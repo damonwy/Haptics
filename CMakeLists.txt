@@ -10,6 +10,7 @@ SET(DEF_DIR_GLEW "D:\\Libraries\\glew-2.1.0")
 SET(DEF_DIR_EIGEN "D:\\Libraries\\eigen-eigen-6c3592226be0")
 #SET(DEF_DIR_TETGEN "D:\\Libraries\\tetgen1.5.1-beta1")
 SET(DEF_DIR_MOSEK "D:\\Libraries\\mosek_8.1_x64\\8\\tools\\platform\\win64x86")
+SET(DEF_DIR_ODEINT "D:\\Libraries\\odeint-v2-2.6_boost1.60\\include")
 #SET(DEF_DIR_LIBIGL_INCLUDE "D:\\Libraries\\libigl-master\\libigl\\include")
 #SET(DEF_DIR_PARDISO "D:\\Libraries\\PARDISO")
 #SET(DEF_DIR_MKL "C:\\Program Files (x86)\\IntelSWTools\\compilers_and_libraries_2018\\windows\\mkl")
@@ -161,6 +162,27 @@ INCLUDE_DIRECTORIES(${MOSEK_DIR}/8/tools/platform/win64x86/h)
 IF(WIN32)
   TARGET_LINK_LIBRARIES(${CMAKE_PROJECT_NAME} ${MOSEK_DIR}/8/tools/platform/win64x86/bin/mosek64_8_1.lib)
 ENDIF()
+
+# Get the odeint environment variable. Since odeint is a header-only library, we
+# just need to add it to the include directory.
+SET(ODEINT_INCLUDE_DIR "$ENV{ODEINT_INCLUDE_DIR}")
+IF(NOT ODEINT_INCLUDE_DIR)
+  # The environment variable was not set
+  SET(ERR_MSG "Please point the environment variable ODEINT_INCLUDE_DIR to the root directory of your odeint installation.")
+  IF(WIN32)
+    # On Windows, try the default location
+    MESSAGE(STATUS "Looking for odeint in ${DEF_DIR_ODEINT}")
+    IF(IS_DIRECTORY ${DEF_DIR_ODEINT})
+      MESSAGE(STATUS "Found!")
+      SET(EIGEN3_INCLUDE_DIR ${DEF_DIR_ODEINT})
+    ELSE()
+      MESSAGE(FATAL_ERROR ${ERR_MSG})
+    ENDIF()
+  ELSE()
+    MESSAGE(FATAL_ERROR ${ERR_MSG})
+  ENDIF()
+ENDIF()
+INCLUDE_DIRECTORIES(${ODEINT_INCLUDE_DIR})
 
 # OS specific options and libraries
 IF(WIN32)
