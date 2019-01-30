@@ -213,7 +213,7 @@ void SpringDamper::computeForceStiffnessDampingSparse_(VectorXd &f, std::vector<
 	Vector12d f_;
 	Matrix12d K_, D_;
 	computeFKD(f_, K_, D_);
-
+	
 	int idxM0, idxM1;
 
 	if (m_body0 != nullptr) {
@@ -319,70 +319,71 @@ void SpringDamper::computeFKD(Vector12d &f, Matrix12d &K, Matrix12d &D) {
 	Vector12d fx, fn;
 	fx << fx_0, fx_1;
 
-	fn = (1.0 / m_l) *fx;
-	double fs = m_K * (m_l - m_L) / m_L - m_damping * v;
+	fn = (1.0 / m_l) * fx;
+	double fs = m_K * (m_l - m_L) / m_L - m_damping * v / m_L;
 
 	f = -fs * fn;
 
 	// Kn0
-	Vector3d ddxinvdx0, ddxinvdx1;
-	ddxinvdx0 = dx_w / (m_l * m_l * m_l);
-	ddxinvdx1 = -ddxinvdx0;
+	//Vector3d ddxinvdx0, ddxinvdx1;
+	//ddxinvdx0 = dx_w / (m_l * m_l * m_l);
+	//ddxinvdx1 = -ddxinvdx0;
 
-	Vector6d ddxinvdE0, ddxinvdE1;
-	ddxinvdE0.noalias() = ddxinvdx0.transpose() * R0 * G0;
-	ddxinvdE1.noalias() = ddxinvdx1.transpose() * R1 * G1;
-	Vector12d ddxinvdE;
-	ddxinvdE << ddxinvdE0, ddxinvdE1;
+	//Vector6d ddxinvdE0, ddxinvdE1;
+	//ddxinvdE0.noalias() = ddxinvdx0.transpose() * R0 * G0;
+	//ddxinvdE1.noalias() = ddxinvdx1.transpose() * R1 * G1;
+	//Vector12d ddxinvdE;
+	//ddxinvdE << ddxinvdE0, ddxinvdE1;
 
-	Matrix12d Kn0, Kn1, Kn;
-	Kn0 = fx * ddxinvdE.transpose();
-	//cout << Kn0 << endl;
-	// Kn1
-	Kn1.setZero();
-	Vector3d p0, p1;
-	p0 = E0.block<3, 1>(0, 3);
-	p1 = E1.block<3, 1>(0, 3);
+	//Matrix12d Kn0, Kn1, Kn;
+	//Kn0 = fx * ddxinvdE.transpose();
+	////cout << Kn0 << endl;
+	//// Kn1
+	//Kn1.setZero();
+	//Vector3d p0, p1;
+	//p0 = E0.block<3, 1>(0, 3);
+	//p1 = E1.block<3, 1>(0, 3);
 
-	Matrix3d x0b, x1b;
-	x0b = SE3::bracket3(m_r0);
-	x1b = SE3::bracket3(m_r1);
+	//Matrix3d x0b, x1b;
+	//x0b = SE3::bracket3(m_r0);
+	//x1b = SE3::bracket3(m_r1);
 
-	Matrix3d I3;
-	I3.setIdentity();
+	//Matrix3d I3;
+	//I3.setIdentity();
 
-	Matrix3d R1R0, R0R1;
-	R1R0.noalias() = R1.transpose() * R0;
-	R0R1 = R1R0.transpose();
+	//Matrix3d R1R0, R0R1;
+	//R1R0.noalias() = R1.transpose() * R0;
+	//R0R1 = R1R0.transpose();
 
-	Kn1.block<3, 3>(3, 0).noalias() = SE3::bracket3(R0.transpose() * (p0 - x1_w));
-	Kn1.block<3, 3>(0, 0).noalias() = x0b * Kn1.block<3, 3>(3, 0);
-	Kn1.block<3, 3>(9, 0).noalias() = R1R0 * x0b;//
-	Kn1.block<3, 3>(6, 0).noalias() = x1b * Kn1.block<3, 3>(9, 0);//
-	Kn1.block<3, 3>(3, 3) = I3;
-	Kn1.block<3, 3>(0, 3) = x0b;//
-	Kn1.block<3, 3>(9, 3) = -R1R0;
-	Kn1.block<3, 3>(6, 3).noalias() = x1b * Kn1.block<3, 3>(9, 3);
-	Kn1.block<3, 3>(3, 6).noalias() = R0R1 * x1b;
-	Kn1.block<3, 3>(0, 6).noalias() = x0b * Kn1.block<3, 3>(3, 6);
-	Kn1.block<3, 3>(9, 6).noalias() = SE3::bracket3(R1.transpose() *(p1 - x0_w));
-	Kn1.block<3, 3>(6, 6).noalias() = x1b * Kn1.block<3, 3>(9, 6);
-	Kn1.block<3, 3>(3, 9) = -R0R1;
-	Kn1.block<3, 3>(0, 9).noalias() = x0b * Kn1.block<3, 3>(3, 9);
-	Kn1.block<3, 3>(9, 9) = I3;
-	Kn1.block<3, 3>(6, 9) = x1b;
-	Kn1 /= m_l;
-	// Stiffness term for vector part
-	Kn = Kn0 + Kn1;
+	//Kn1.block<3, 3>(3, 0).noalias() = SE3::bracket3(R0.transpose() * (p0 - x1_w));
+	//Kn1.block<3, 3>(0, 0).noalias() = x0b * Kn1.block<3, 3>(3, 0);
+	//Kn1.block<3, 3>(9, 0).noalias() = R1R0 * x0b;//
+	//Kn1.block<3, 3>(6, 0).noalias() = x1b * Kn1.block<3, 3>(9, 0);//
+	//Kn1.block<3, 3>(3, 3) = I3;
+	//Kn1.block<3, 3>(0, 3) = x0b;//
+	//Kn1.block<3, 3>(9, 3) = -R1R0;
+	//Kn1.block<3, 3>(6, 3).noalias() = x1b * Kn1.block<3, 3>(9, 3);
+	//Kn1.block<3, 3>(3, 6).noalias() = R0R1 * x1b;
+	//Kn1.block<3, 3>(0, 6).noalias() = x0b * Kn1.block<3, 3>(3, 6);
+	//Kn1.block<3, 3>(9, 6).noalias() = SE3::bracket3(R1.transpose() *(p1 - x0_w));
+	//Kn1.block<3, 3>(6, 6).noalias() = x1b * Kn1.block<3, 3>(9, 6);
+	//Kn1.block<3, 3>(3, 9) = -R0R1;
+	//Kn1.block<3, 3>(0, 9).noalias() = x0b * Kn1.block<3, 3>(3, 9);
+	//Kn1.block<3, 3>(9, 9) = I3;
+	//Kn1.block<3, 3>(6, 9) = x1b;
+	//Kn1 /= m_l;
+	//// Stiffness term for vector part
+	//Kn = Kn0 + Kn1;
 
 	// Stiffness scalar part
-	Vector3d dfsdx0 = - m_K / m_L * dx_w/ m_l;
+	Vector3d dfsdx0 = - m_K / m_L * dx_w / m_l;
 	Vector6d dfsdE0 = dfsdx0.transpose() * R0 * G0;
 	Vector6d dfsdE1 = -dfsdx0.transpose() * R1 * G1;
 
 	Vector12d dfsdE;
 	dfsdE << dfsdE0, dfsdE1;
-	K.noalias() = fn * dfsdE.transpose() + fs * Kn;
+
+	K.noalias() = fn * dfsdE.transpose()/* + fs * Kn*/;
 
 	Matrix12d K_sym = -0.5 * (K + K.transpose());
 
@@ -391,7 +392,8 @@ void SpringDamper::computeFKD(Vector12d &f, Matrix12d &K, Matrix12d &D) {
 	// Damping scalar part
 	Vector3d dir_w = dx_w / m_l;
 	Vector6d dfmdphi0, dfmdphi1;
-	Vector3d dfmdv0 = m_damping * dir_w;
+	Vector3d dfmdv0 = m_damping / m_L * dir_w;
+
 	dfmdphi0.noalias() = dfmdv0.transpose() * R0 * G0;
 	dfmdphi1.noalias() = -dfmdv0.transpose() * R1 * G1;
 	Vector12d dfmdphi;

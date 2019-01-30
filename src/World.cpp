@@ -653,13 +653,13 @@ void World::load(const std::string &RESOURCE_DIR) {
 		//m_joints[0]->m_q(0) = -M_PI / 2.0;
 		//m_joints[1]->m_q(0) = -M_PI / 2.0;
 
-		/*auto spring = make_shared<SpringDamper>(m_bodies[0], Vector3d(0.0, 0.5, 0.0), m_bodies[1], Vector3d(0.0, 0.5, 0.0));
+		auto spring = make_shared<SpringDamper>(m_bodies[0], Vector3d(0.0, 0.5, 0.0), m_bodies[1], Vector3d(0.0, 0.5, 0.0));
 		m_springs.push_back(spring);
 		m_nsprings++;
 		spring->setStiffness(1.0e1);
 		spring->setDamping(1.0e3);
 		spring->load(RESOURCE_DIR);
-*/
+
 	}
 	break;
 

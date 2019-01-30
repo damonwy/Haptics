@@ -334,8 +334,13 @@ VectorXd SolverSparse::dynamics(VectorXd y)
 		fr_ = Mr_sp * qdot0 + h * (J_t_sp * (fm - Mm_sp * Jdot_sp * qdot0) + fr); 
 		MDKr_sp = Mr_sp + J_t_sp * (h * Dm_sp - hsquare * Km_sp) * J_sp + h * Dr_sp - hsquare * Kr_sp;
 		//cout << MatrixXd(MDKr_sp) << endl << endl;
-		//cout << "Mr_sp"<< endl << MatrixXd(Mr_sp) << endl << endl;
+		cout << "fm" << fm << endl << endl;
+		cout << "fr" << fr << endl << endl;
+		cout << "Jdot_sp" << MatrixXd(Jdot_sp) << endl << endl;
+		cout << "Mr_sp"<< endl << MatrixXd(Mr_sp) << endl << endl;
 		//cout << "J_sp" << endl << MatrixXd(J_sp) << endl << endl;
+		cout << "Dm_sp" << endl << MatrixXd(Dm_sp) << endl << endl;
+		cout << "Km_sp" << endl << MatrixXd(Km_sp) << endl << endl;
 		//cout << "fr_"<< (fr_) << endl << endl;
 		//cout <<"fm"<< fm << endl << endl;
 	
@@ -472,7 +477,8 @@ VectorXd SolverSparse::dynamics(VectorXd y)
 
 			qdot1 = cg.solveWithGuess(fr_, qdot0);
 
-
+			cout << MatrixXd(MDKr_sp) << endl << endl;
+			cout << fr_ << endl << endl;
 			cout << qdot1 << endl;
 		}
 		else if (ne > 0 && ni == 0) {  // Just equality
