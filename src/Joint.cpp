@@ -118,6 +118,7 @@ void Joint::countDofs(int &nm, int &nr) {
 	// Counts reduced DOFs
 	idxR = countR(nr, m_ndof);
 	m_body->countDofs(nm);
+	m_q0 = m_q;
 }
 
 void Joint::countHRDofs(int &nR) {
@@ -202,7 +203,7 @@ void Joint::computeForceStiffness(VectorXd &fr, MatrixXd &Kr) {
 	if (presc == nullptr) {
 		int row = this->idxR;
 		// Add the joint torque here rather than having a separate function
-		fr.segment(row, m_ndof).noalias() += m_tau - m_Kr * m_q;
+		fr.segment(row, m_ndof).noalias() += m_tau - m_Kr * (m_q - m_q0);
 		MatrixXd I(m_ndof, m_ndof);
 		I.setIdentity();
 		Kr.block(row, row, m_ndof, m_ndof) -= m_Kr * I;
@@ -279,7 +280,9 @@ VectorXd Joint::computerJacTransProd(VectorXd y, VectorXd x, int nr) {
 void Joint::computeEnergies(Vector3d grav, Energy &ener) {
 	// Computes kinetic and potential energies
 	m_body->computeEnergies(grav, ener);
-	ener.V += 0.5 * m_Kr * m_q.dot(m_q);
+	VectorXd dq = m_q - m_q0;
+	ener.V += 0.5 * m_Kr * dq.dot(dq);
+
 	if (next != nullptr) {
 		next->computeEnergies(grav, ener);
 	}

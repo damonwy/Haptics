@@ -35,6 +35,7 @@ public:
 	virtual void update();
 
 	int m_ndof;						// Number of DOF
+	Eigen::VectorXd m_q0;			// Initial position (for stiffness)
 	Eigen::VectorXd m_q;			// Position
 	Eigen::VectorXd m_qdot;			// Velocity
 	Eigen::VectorXd m_qddot;		// Acceleration

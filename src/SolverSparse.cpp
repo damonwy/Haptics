@@ -21,6 +21,8 @@
 using namespace std;
 using namespace Eigen;
 
+#define CHECK_ENERGY
+
 void SolverSparse::initMatrix(int nm, int nr, int nem, int ner, int nim, int nir) {
 	ni = nim + nir;
 	int nre = nr + ne;
@@ -238,6 +240,14 @@ VectorXd SolverSparse::dynamics(VectorXd y)
 			J_vec_idx = J_.size();
 		}
 
+#ifdef CHECK_ENERGY
+		Energy ener = m_world->computeEnergy();
+		cout << "V" << ener.V << endl;
+		cout << "K" << ener.K << endl;
+		cout << " sum " << ener.V + ener.K << endl;
+
+#endif // CHECK_ENERGY
+
 		nim = m_world->nim;
 		nir = m_world->nir;
 		
@@ -268,6 +278,7 @@ VectorXd SolverSparse::dynamics(VectorXd y)
 			break;
 		}
 
+		
 			
 		body0->computeGrav(grav, fm);
 		body0->computeForceDampingSparse(tmp, Dm_);
@@ -452,9 +463,17 @@ VectorXd SolverSparse::dynamics(VectorXd y)
 			cg.setMaxIterations(100000);
 			cg.setTolerance(1e-10);
 			cg.compute(MDKr_sp);
+			if (cg.info() != Success) {
+				// solve() failed
+
+				cout << "solve failed" << endl << endl;
+				exit(1);
+			}
+
 			qdot1 = cg.solveWithGuess(fr_, qdot0);
 
-			//cout << qdot1 << endl;
+
+			cout << qdot1 << endl;
 		}
 		else if (ne > 0 && ni == 0) {  // Just equality
 			//int rows = nr + ne;
@@ -668,10 +687,7 @@ VectorXd SolverSparse::dynamics(VectorXd y)
 		deformable0->scatterDofs(yk, nr);
 		deformable0->scatterDDofs(ydotk, nr);
 
-		//Energy ener = m_world->computeEnergy();
-		/*cout << "V" << ener.V << endl;
-		cout << "K" << ener.K << endl;
-		cout << " sum " << ener.V + ener.K << endl;*/
+		
 
 		step++;
 		return yk;

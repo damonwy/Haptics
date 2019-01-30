@@ -626,6 +626,43 @@ void World::load(const std::string &RESOURCE_DIR) {
 		m_constraints.push_back(con0);
 		break;
 	}
+
+	case MUSCLE_INERTIA:
+	{
+		m_h = 1.0e-2;
+		m_tspan << 0.0, 50.0;
+		m_t = 0.0;
+		density = 1.0;
+		m_grav << 0.0, -98, 0.0;
+		Eigen::from_json(js["sides"], sides);
+		double young = 1e2;
+		double possion = 0.40;
+
+		for (int i = 0; i < 2; i++) {
+			auto body = addBody(density, sides, Vector3d(5.0, 0.0, 0.0), Matrix3d::Identity(), RESOURCE_DIR, "cylinder_9.obj");
+
+			// Inits joints
+			if (i == 0) {
+				//addJointFixed(body, Vector3d(0.0, 0.0, 0.0), Matrix3d::Identity(), 0.0);
+				addJointRevolute(body, Vector3d::UnitZ(), Vector3d(10.0, 0.0, 0.0), Matrix3d::Identity(), 0.0, RESOURCE_DIR);
+			}
+			else {
+				auto joint = addJointRevolute(body, Vector3d::UnitZ(), Vector3d(10.0, 0.0, 0.0), Matrix3d::Identity(), 0.0, RESOURCE_DIR, m_joints[i - 1]);
+			}
+		}
+		//m_joints[0]->m_q(0) = -M_PI / 2.0;
+		//m_joints[1]->m_q(0) = -M_PI / 2.0;
+
+		/*auto spring = make_shared<SpringDamper>(m_bodies[0], Vector3d(0.0, 0.5, 0.0), m_bodies[1], Vector3d(0.0, 0.5, 0.0));
+		m_springs.push_back(spring);
+		m_nsprings++;
+		spring->setStiffness(1.0e1);
+		spring->setDamping(1.0e3);
+		spring->load(RESOURCE_DIR);
+*/
+	}
+	break;
+
 default:
 		break;
 	}
@@ -1114,6 +1151,7 @@ Energy World::computeEnergy() {
 
 	m_joints[0]->computeEnergies(m_grav, m_energy);
 	m_deformables[0]->computeEnergies(m_grav, m_energy);
+	m_springs[0]->computeEnergies(m_grav, m_energy);
 
 	if (m_t == 0.0) {
 		m_energy0 = m_energy;
