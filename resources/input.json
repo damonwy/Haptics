@@ -1,5 +1,5 @@
 {	
-	"h":1e-3,
+	"h":1e-2,
 	"drawHz":1000,
 	"boxShape0": "box10_1_1.obj",
 	"mass": 4.2,
