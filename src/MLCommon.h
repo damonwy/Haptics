@@ -1,10 +1,10 @@
 #pragma once
 #ifndef MUSCLEMASS_SRC_MLCOMMON_H_
 #define MUSCLEMASS_SRC_MLCOMMON_H_
-#include <json.hpp>
+#include <nlohmann/json.hpp>
 
 #define EIGEN_DONT_ALIGN_STATICALLY
-#include <Eigen\Dense>
+#include <Eigen/Dense>
 //#include <Eigen/Sparse>
 #include <Eigen/Eigenvalues> 
 
@@ -21,7 +21,7 @@
 #define MAX(a, b) ((a)>(b)?(a):(b))
 #define ToRadian(x) (double)(((x) * M_PI / 180.0))
 
-#include <omp.h>
+//#include <omp.h>
 
 //typedef Eigen::Triplet<double> T;
 
@@ -75,21 +75,21 @@ struct Energy {
 enum SparseSolver {CG, CG_ILUT, QR, BICG,BICG_ILUT, SLDLT, LU, PARDISO_LU, PARDISO_LDLT, MINRES_SOLVER, GMRES_SOLVER, SUPER_LU
 };
 
-template<typename T>
-using  MatrixType = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>;
-
-template<typename Scalar, int rank, typename sizeType>
-inline auto Tensor_to_Matrix(const Eigen::Tensor<Scalar, rank> &tensor, const sizeType rows, const sizeType cols)
-{
-	return Eigen::Map<const MatrixType<Scalar>>(tensor.data(), rows, cols);
-}
-
-template<typename Scalar, typename... Dims>
-inline auto Matrix_to_Tensor(const MatrixType<Scalar> &matrix, Dims... dims)
-{
-	constexpr int rank = sizeof... (Dims);
-	return Eigen::TensorMap<Eigen::Tensor<const Scalar, rank>>(matrix.data(), { dims... });
-}
+//template<typename T>
+//using  MatrixType = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>;
+//
+//template<typename Scalar, int rank, typename sizeType>
+//inline auto Tensor_to_Matrix(const Eigen::Tensor<Scalar, rank> &tensor, const sizeType rows, const sizeType cols)
+//{
+//    return Eigen::Map<const MatrixType<Scalar>>(tensor.data(), rows, cols);
+//}
+//
+//template<typename Scalar, typename... Dims>
+//inline auto Matrix_to_Tensor(const MatrixType<Scalar> &matrix, Dims... dims)
+//{
+//    constexpr int rank = sizeof... (Dims);
+//    return Eigen::TensorMap<Eigen::Tensor<const Scalar, rank>>(matrix.data(), { dims... });
+//}
 
 
 
@@ -655,14 +655,14 @@ inline int SVD(Eigen::Matrix3d &F,
 //}
 
 const int MIN_ITERATOR_NUM = 4;
-inline int getThreadsNumber(int n, int min_n) {
-	int ncore = omp_get_num_procs();
-	int max_tn = n / min_n;
-	int tn = max_tn > 2 * ncore ? 2 * ncore : max_tn;
-	if (tn < 1) {
-		tn = 1;
-	}
-	return tn;
-}
+//inline int getThreadsNumber(int n, int min_n) {
+//    int ncore = omp_get_num_procs();
+//    int max_tn = n / min_n;
+//    int tn = max_tn > 2 * ncore ? 2 * ncore : max_tn;
+//    if (tn < 1) {
+//        tn = 1;
+//    }
+//    return tn;
+//}
 
 #endif // MUSCLEMASS_SRC_MLCOMMON_H_

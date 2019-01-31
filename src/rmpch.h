@@ -9,7 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <cstdlib>
-#include <omp.h>
+//#include <omp.h>
 
 #ifdef _MEX_
 #include "mex.h"
@@ -30,7 +30,7 @@
 #include <string>
 #include <cstring>
 #include <cassert>
-#include <json.hpp>
+#include <nlohmann/json.hpp>
 
 #include "SE3.h"
 #include "MatlabDebug.h"

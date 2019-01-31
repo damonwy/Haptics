@@ -54,17 +54,15 @@ using namespace Eigen;
 using json = nlohmann::json;
 
 World::World() :
-	nr(0), nm(0), nR(0), nem(0), ner(0), ne(0), nim(0), nir(0), m_nbodies(0), m_njoints(0), m_ndeformables(0), m_constraints(0), m_countS(0), m_countCM(0),
-	m_ncomps(0), m_nwraps(0), m_nsprings(0)
+nm(0), nr(0), nR(0), nem(0), ner(0), ne(0), nim(0), nir(0), m_countS(0),m_countCM(0), m_nbodies(0), m_njoints(0), m_ndeformables(0), m_nsprings(0), m_ncomps(0), m_nwraps(0), m_constraints(0)
 {
 	m_energy.K = 0.0;
 	m_energy.V = 0.0;
 }
 
 World::World(WorldType type) :
-	m_type(type),
-	nr(0), nm(0), nR(0),nem(0), ner(0), ne(0), nim(0), nir(0), m_nbodies(0), m_njoints(0), m_ndeformables(0), m_nconstraints(0), m_countS(0), m_countCM(0),
-	m_ncomps(0), m_nwraps(0), m_nsprings(0)
+nm(0), nr(0), nR(0), nem(0), ner(0), ne(0), nim(0), nir(0), m_countS(0),m_countCM(0), m_type(type), m_nbodies(0), m_njoints(0), m_ndeformables(0), m_nsprings(0), m_ncomps(0), m_nwraps(0), m_constraints(0)
+
 {
 	m_energy.K = 0.0;
 	m_energy.V = 0.0;
@@ -430,9 +428,6 @@ void World::load(const std::string &RESOURCE_DIR) {
 		density = 1.0;
 		m_grav << 0.0, -98, 0.0;
 		Eigen::from_json(js["sides"], sides);
-		double young = 1e2;
-		double possion = 0.40;
-
 		for (int i = 0; i < 3; i++) {
 			auto body = addBody(density, sides, Vector3d(5.0, 0.0, 0.0), Matrix3d::Identity(), RESOURCE_DIR, "cylinder_9.obj");
 
@@ -635,8 +630,6 @@ void World::load(const std::string &RESOURCE_DIR) {
 		density = 1.0;
 		m_grav << 0.0, -98, 0.0;
 		Eigen::from_json(js["sides"], sides);
-		double young = 1e2;
-		double possion = 0.40;
 
 		for (int i = 0; i < 2; i++) {
 			auto body = addBody(density, sides, Vector3d(5.0, 0.0, 0.0), Matrix3d::Identity(), RESOURCE_DIR, "cylinder_9.obj");
@@ -1332,7 +1325,6 @@ void World::setListOfMaximalPrescStates(Eigen::VectorXi mcon, Vector3d vt_w, Vec
 
 
 void World::sceneTestHyperReduced(double t) {
-	double q, dq;
 	if (t < 2.0) {
 		
 		//computeTargetQ(0.0, 2.0, t, M_PI / 8.0, 0.0, q, dq);
@@ -1352,11 +1344,7 @@ void World::sceneTestHyperReduced(double t) {
 void World::sceneAttachPoint(double t) {
 
 	Vector3d vt_w, wt_i;
-	Vector3d zero = Vector3d::Zero();
 	vt_w.setZero();
-
-	double beta = 0.3;
-
 	if (t < 105.0) {
 		vt_w << 0, 0.0, 0.0;
 		setMaximalPrescAttachPointStates(3, 0, vt_w);

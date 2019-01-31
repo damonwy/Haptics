@@ -5,7 +5,7 @@
 #include <Eigen/Dense>
 #include <Eigen/SparseCholesky>
 #include <Eigen/OrderingMethods>
-#include <Eigen\src\Core\util\IndexedViewHelper.h>
+#include <Eigen/src/Core/util/IndexedViewHelper.h>
 #include <Eigen/Cholesky>
 //#include <Eigen/PardisoSupport>
 #include <Eigen/SparseLU>

@@ -8,7 +8,7 @@
 
 #define EIGEN_DONT_ALIGN_STATICALLY
 #include <Eigen/Dense>
-#include <json.hpp>
+#include <nlohmann/json.hpp>
 #include "MLCommon.h"
 
 class Node;
