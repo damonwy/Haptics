@@ -11,10 +11,13 @@
 //#include "Spring.h"
 #include "Deformable.h"
 #include "DeformableSpring.h"
+#include <boost/numeric/odeint.hpp>
+#include "EigenOdeintHelper.h"
 
 using namespace std;
 using namespace Eigen;
 using json = nlohmann::json;
+using namespace boost::numeric::odeint;
 
 #include <unsupported/Eigen/MatrixFunctions> // TODO: avoid using this later, write a func instead
 
@@ -47,8 +50,7 @@ void Scene::load(const string &RESOURCE_DIR)
 	m_world->load(RESOURCE_DIR);
 
 	//m_solver = make_shared<SolverDense>(m_world, REDMAX_EULER);
-	m_solver = make_shared<SolverSparse>(m_world, REDMAX_EULER, LU);
-	
+	m_solver = make_shared<SolverSparse>(m_world, REDMAX_EULER, LU);	
 }
 
 
@@ -73,7 +75,6 @@ void Scene::init()
 	//tk = m_solution->t(0);
 	drawH = 1.0 / drawHz;
 	search_idx = 0;
-
 }
 
 void Scene::reset()
@@ -81,15 +82,21 @@ void Scene::reset()
 	
 }
 
-void Scene::solve() {
-	
 
+void Scene::solve() {
 }
 
 int torend = 0;
 void Scene::step()
-{	
+{
 	VectorXd ys;
+
+	//runge_kutta_cash_karp54<Eigen::VectorXd> stepper;
+	//vector<Eigen::VectorXd> x_vec;
+	//vector<double> times;
+
+	//integrate_adaptive(stepper, , y, 0.0, h, h, Observer(x_vec, times));
+	//cout << x_vec[1] << endl;
 
 	y = m_solver->dynamics(y);
 	//m_world->getJoint0()->reparam();

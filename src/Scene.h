@@ -57,4 +57,23 @@ private:
 
 };
 
+class Observer
+{
+public:
+	Observer(std::vector<Eigen::VectorXd>& states, std::vector<double>& times): 
+		m_states(states), m_times(times)
+	{
+	}
+
+	void operator()(const Eigen::VectorXd& x, double t)
+	{
+		m_states.push_back(x);
+		m_times.push_back(t);
+	}
+
+private:
+	std::vector<Eigen::VectorXd>& m_states;
+	std::vector<double>& m_times;
+};
+
 #endif // MUSCLEMASS_SRC_SCENE_H_

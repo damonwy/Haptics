@@ -74,6 +74,10 @@ class Solver
 public:
 	Solver();
 	Solver(std::shared_ptr<World> world, Integrator integrator);
+	virtual void test(const Eigen::VectorXd &x, Eigen::VectorXd &dxdt, const double) {}
+	static void wrapper_to_call_test(std::shared_ptr<Solver>ptr2object, const Eigen::VectorXd &x, Eigen::VectorXd &dxdt, const double t) {
+		ptr2object->test(x, dxdt, t);
+	}
 	virtual ~Solver() {}
 	virtual std::shared_ptr<Solution> solve() { return m_solutions; }
 	virtual Eigen::VectorXd dynamics(Eigen::VectorXd y) { Eigen::Vector3d z; z.setZero(); return z; }
