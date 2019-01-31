@@ -24,7 +24,6 @@ using json = nlohmann::json;
 Scene::Scene() :
 	t(0.0),
 	h(1e-2),
-	time_step(0),
     drawHz(10),
 	grav(0.0, 0.0, 0.0)
 {

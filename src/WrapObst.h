@@ -92,7 +92,7 @@ public:
 		m_radius = 0.0;
 		m_type = none;
 	}
-
+    virtual ~WrapObst(){}
 	// wrap calculation
 	virtual void compute() {}
 	virtual void init() {}
@@ -116,8 +116,6 @@ public:
 			next->draw(MV, prog, progSimple, P);
 		}
 	}
-
-
 };
 
 

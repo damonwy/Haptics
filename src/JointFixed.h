@@ -32,4 +32,4 @@ protected:
 
 
 
-#endif MUSCLEMASS_SRC_JOINTFIXED_H_
+#endif // MUSCLEMASS_SRC_JOINTFIXED_H_

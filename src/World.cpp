@@ -61,7 +61,7 @@ nm(0), nr(0), nR(0), nem(0), ner(0), ne(0), nim(0), nir(0), m_countS(0),m_countC
 }
 
 World::World(WorldType type) :
-nm(0), nr(0), nR(0), nem(0), ner(0), ne(0), nim(0), nir(0), m_countS(0),m_countCM(0), m_type(type), m_nbodies(0), m_njoints(0), m_ndeformables(0), m_nsprings(0), m_ncomps(0), m_nwraps(0), m_constraints(0)
+nm(0), nr(0), nR(0), nem(0), ner(0), ne(0), nim(0), nir(0), m_countS(0),m_countCM(0),  m_nbodies(0), m_njoints(0), m_ndeformables(0), m_nsprings(0), m_ncomps(0), m_nwraps(0), m_type(type), m_constraints(0)
 
 {
 	m_energy.K = 0.0;

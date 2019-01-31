@@ -6,16 +6,16 @@ using namespace std;
 using namespace Eigen;
 
 Node::Node() :
-	r(0.1),
-	m(1.0),
-	i(-1),
-	x(0.0, 0.0, 0.0),
-	v(0.0, 0.0, 0.0),
-	m_nfaces(0),
-	fixed(false),
-	attached(false),
-	isEnclosedByTet(false),
-	isCollisionDetection(false)
+isEnclosedByTet(false),
+fixed(false),
+isCollisionDetection(false),
+r(0.1),
+m(1.0),
+i(-1),
+x(0.0, 0.0, 0.0),
+v(0.0, 0.0, 0.0),
+m_nfaces(0),
+attached(false)
 {
 	
 }

@@ -30,8 +30,10 @@ private:
 
 public:
 	WrapCylinder();
+    
 	WrapCylinder(const std::shared_ptr<Node> &P, const std::shared_ptr<Node> &S, const std::shared_ptr<CompCylinder> compCylinder, const int num_points);
 
+    virtual ~WrapCylinder(){}
 	void compute();	
 	Eigen::MatrixXd getPoints(int num_points) const;
 	void init();

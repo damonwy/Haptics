@@ -32,7 +32,6 @@ void ConstraintLoop::computeJacEqM_(MatrixXd &Gm, MatrixXd &Gmdot, VectorXd &gm,
 	Vector3d v0_abs = v0.cwiseAbs();
 	// Get Location of minimum
 	VectorXd::Index min_i;
-	double min = v0_abs.minCoeff(&min_i);
 	Vector3d v1; 
 	v1.setZero();
 	v1(min_i) = 1.0;

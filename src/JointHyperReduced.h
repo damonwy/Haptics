@@ -5,8 +5,6 @@
 
 #include "Joint.h"
 
-
-
 class JointHyperReduced : public Joint {
 
 public:

@@ -54,7 +54,7 @@ private:
 public:
 
 	WrapDoubleCylinder();
-
+    virtual ~WrapDoubleCylinder(){}
 	WrapDoubleCylinder(const std::shared_ptr<Node> &P,
 		const std::shared_ptr<Node> &S,
 		const std::shared_ptr<CompDoubleCylinder> compDoubleCylinder,

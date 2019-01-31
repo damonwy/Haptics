@@ -12,9 +12,7 @@ using json = nlohmann::json;
 CompCylinder::CompCylinder() {
 }
 
-CompCylinder::CompCylinder(shared_ptr<Body> parent, double r) : m_parent(parent), m_r(r){
-
-
+CompCylinder::CompCylinder(shared_ptr<Body> parent, double r) :  m_r(r), m_parent(parent){
 }
 
 void CompCylinder::init() {

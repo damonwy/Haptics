@@ -8,12 +8,11 @@ using namespace Eigen;
 using json = nlohmann::json;
 
 Deformable::Deformable():
-	m_K(0.0), m_mass(1.0), m_damping(0.0) {
-
+	m_K(0.0), m_damping(0.0), m_mass(1.0){
 }
 
 Deformable::Deformable(int &countS, int &countCM):
-	m_K(0.0), m_mass(1.0), m_damping(0.0) {
+	m_K(0.0), m_damping(0.0), m_mass(1.0) {
 	countS++;
 	countCM++;
 }
@@ -51,7 +50,6 @@ void Deformable::scatterDofs(VectorXd &y, int nr) {
 	if (next != nullptr) {
 		next->scatterDofs(y, nr);
 	}
-
 }
 
 void Deformable::scatterDDofs(VectorXd &ydot, int nr) {
@@ -96,7 +94,6 @@ void Deformable::computeForce(Vector3d grav, VectorXd &f) {
 	}
 }
 
-
 void Deformable::computeForceDamping(Vector3d grav, VectorXd &f, MatrixXd &D) {
 	computeForceDamping_(grav, f, D);
 	if (next != nullptr) {
@@ -109,7 +106,6 @@ void Deformable::computeForceDampingSparse(Vector3d grav, VectorXd &f, vector<T>
 	if (next != nullptr) {
 		next->computeForceDampingSparse(grav, f, D_);
 	}
-
 }
 
 void Deformable::computeEnergies(Vector3d grav, Energy &ener) {
