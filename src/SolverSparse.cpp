@@ -611,6 +611,7 @@ VectorXd SolverSparse::dynamics(VectorXd y)
 					program_->setEqualityVector(rhsG);
 
 					bool success = program_->solve();
+                    assert(success == true);
 					VectorXd sol = program_->getPrimalSolution();
 					qdot1 = sol.segment(0, nr);	
 					VectorXd l = program_->getDualEquality();
@@ -644,6 +645,7 @@ VectorXd SolverSparse::dynamics(VectorXd y)
 			program_->setInequalityVector(cvec);
 
 			bool success = program_->solve();
+            assert(success == true);
 			VectorXd sol = program_->getPrimalSolution();
 			qdot1 = sol.segment(0, nr);
 		}
@@ -676,6 +678,7 @@ VectorXd SolverSparse::dynamics(VectorXd y)
 			program_->setEqualityVector(rhsG);
 
 			bool success = program_->solve();
+            assert(success == true);
 			VectorXd sol = program_->getPrimalSolution();
 			qdot1 = sol.segment(0, nr);
 		}

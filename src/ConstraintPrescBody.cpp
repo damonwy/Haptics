@@ -6,7 +6,7 @@ using namespace std;
 using namespace Eigen;
 
 ConstraintPrescBody::ConstraintPrescBody(shared_ptr<Body> body, VectorXi prows, Integrator vel) :
-	Constraint(prows.size(), 0, 0, 0), m_body(body), m_prows(prows), m_vel(vel)
+	Constraint(prows.size(), 0, 0, 0), m_body(body), m_vel(vel), m_prows(prows)
 {
 	// set body ->presc = this;
 	m_q.setZero();

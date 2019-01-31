@@ -9,9 +9,9 @@
 #define EIGEN_DONT_ALIGN_STATICALLY
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
-#include <Eigen\src\Core\util\IndexedViewHelper.h>
+#include <Eigen/src/Core/util/IndexedViewHelper.h>
 
-#include <json.hpp>
+#include <nlohmann/json.hpp>
 #include "MLCommon.h"
 
 class World;

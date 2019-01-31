@@ -44,7 +44,7 @@ public:
 
 	double computePotentialEnergy(Eigen::Vector3d grav);
 	void setColor(Eigen::Vector3f color) { m_color = color; }
-
+    void setNumRelatedBodies(const int& n){ m_J.resize(3, n); m_J.setZero();}
 	int idxR;
 	int idxM;
 	std::vector<Eigen::Vector3d> m_normals;
@@ -68,7 +68,7 @@ public:
 	double L;
 	std::shared_ptr<Shape> sphere;
 	
-	
+    Eigen::MatrixXd m_J; // Jacobian Mat wrt joints/bodies
 	bool attached;		
 	Eigen::Vector3d m_r;
 

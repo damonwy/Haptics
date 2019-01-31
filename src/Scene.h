@@ -8,7 +8,7 @@
 
 #define EIGEN_DONT_ALIGN_STATICALLY
 #include <Eigen/Dense>
-#include <json.hpp>
+#include <nlohmann/json.hpp>
 #include "MLCommon.h"
 
 class Node;
@@ -42,11 +42,9 @@ private:
 	int count;
 	double t;
 	double h;
-	int time_step;
 	int search_idx;
 	int drawHz;
 	double drawH;
-	double tk;
 
 	Eigen::Vector3d grav;
 

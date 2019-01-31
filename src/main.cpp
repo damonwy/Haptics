@@ -249,7 +249,7 @@ void stepperFunc()
 int main(int argc, char **argv)
 {
 	Eigen::initParallel();
-	omp_set_num_threads(1);
+	//omp_set_num_threads(1);
 	Eigen::setNbThreads(1);
 
 

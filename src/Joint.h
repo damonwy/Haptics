@@ -6,7 +6,6 @@
 #ifndef REDUCEDCOORD_SRC_JOINT_H_
 #define REDUCEDCOORD_SRC_JOINT_H_
 
-
 #include <vector>
 #include <memory>
 #define EIGEN_DONT_ALIGN_STATICALLY

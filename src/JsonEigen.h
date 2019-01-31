@@ -3,7 +3,7 @@
 #define MUSCLEMASS_SRC_JSONEIGEN_H_
 
 #include <Eigen/Core>
-#include <json.hpp>
+#include <nlohmann/json.hpp>
 
 
 using json = nlohmann::json;

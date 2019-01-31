@@ -15,9 +15,7 @@ SpringDamper::SpringDamper() {
 
 SpringDamper::SpringDamper(shared_ptr<Body> body0, Vector3d r0, shared_ptr<Body> body1, Vector3d r1):
 Spring(),
-m_body0(body0), m_body1(body1), 
-m_r0(r0), m_r1(r1),
-m_K(1.0), m_L(0.0), m_damping(1.0)
+m_L(0.0),m_K(1.0), m_damping(1.0), m_body0(body0), m_body1(body1), m_r0(r0), m_r1(r1)
 {
 	for (int i = 0; i < 2; i++) {
 		auto node = make_shared<Node>();
@@ -405,7 +403,6 @@ void SpringDamper::computeFKD(Vector12d &f, Matrix12d &K, Matrix12d &D) {
 void SpringDamper::draw_(shared_ptr<MatrixStack> MV, const shared_ptr<Program> prog, const shared_ptr<Program> progSimple, shared_ptr<MatrixStack> P) const {
 	// Draw nodes
 	prog->bind();
-	glUniformMatrix4fv(prog->getUniform("P"), 1, GL_FALSE, glm::value_ptr(P->topMatrix()));
 	MV->pushMatrix();
 	glUniformMatrix4fv(prog->getUniform("MV"), 1, GL_FALSE, glm::value_ptr(MV->topMatrix()));
 
@@ -420,8 +417,7 @@ void SpringDamper::draw_(shared_ptr<MatrixStack> MV, const shared_ptr<Program> p
 	// Draw line segments
 
 	progSimple->bind();
-	glUniformMatrix4fv(prog->getUniform("P"), 1, GL_FALSE, glm::value_ptr(P->topMatrix()));
-	glUniformMatrix4fv(prog->getUniform("MV"), 1, GL_FALSE, glm::value_ptr(MV->topMatrix()));
+	glUniformMatrix4fv(progSimple->getUniform("MV"), 1, GL_FALSE, glm::value_ptr(MV->topMatrix()));
 
 	glLineWidth(5);
 	glBegin(GL_LINES);

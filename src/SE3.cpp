@@ -289,7 +289,6 @@ Matrix4d SE3::exp(const Vector6d & phi)
 }
 
 Matrix3d SE3::exp(const Vector3d &phi) {
-	Matrix3d I = Matrix3d::Identity();
 	Vector3d w = phi.segment<3>(0);
 	double wlen = w.norm();
 	Matrix3d R = Matrix3d::Identity();;

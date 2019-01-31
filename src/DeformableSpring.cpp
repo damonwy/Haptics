@@ -82,11 +82,10 @@ void DeformableSpring::draw_(shared_ptr<MatrixStack> MV, const shared_ptr<Progra
 	// Draw nodes
 	prog->bind();
 
-	glUniformMatrix4fv(prog->getUniform("P"), 1, GL_FALSE, glm::value_ptr(P->topMatrix()));
 	MV->pushMatrix();
 	glUniformMatrix4fv(prog->getUniform("MV"), 1, GL_FALSE, glm::value_ptr(MV->topMatrix()));
 
-	int n_nodes = (int)m_nodes.size();
+	int n_nodes = static_cast<int>(m_nodes.size());
 	for (int i = 0; i < n_nodes; i++) {	
 		m_nodes[i]->draw(MV, prog);
 	}
@@ -96,8 +95,7 @@ void DeformableSpring::draw_(shared_ptr<MatrixStack> MV, const shared_ptr<Progra
 
 	// Draw line segments
 	progSimple->bind();
-	glUniformMatrix4fv(prog->getUniform("P"), 1, GL_FALSE, glm::value_ptr(P->topMatrix()));
-	glUniformMatrix4fv(prog->getUniform("MV"), 1, GL_FALSE, glm::value_ptr(MV->topMatrix()));
+	glUniformMatrix4fv(progSimple->getUniform("MV"), 1, GL_FALSE, glm::value_ptr(MV->topMatrix()));
 	
 	glLineWidth(5);
 	glBegin(GL_LINES);
@@ -111,7 +109,6 @@ void DeformableSpring::draw_(shared_ptr<MatrixStack> MV, const shared_ptr<Progra
 		glVertex3f(x0(0), x0(1), x0(2));
 		glVertex3f(x1(0), x1(1), x1(2));
 	}
-	
 	glEnd();
 	progSimple->unbind();
 	
@@ -223,7 +220,7 @@ void DeformableSpring::computeForce_(Vector3d grav, VectorXd &f) {
 		double L = m_nodes[i]->L;
 		double e = (l - L) / L;
 
-		Vector3d fs = m_K * e * (1.0 / L) / l* dx;
+		Vector3d fs = m_K * e * (1.0 / L) / l * dx;
 
 		f.segment<3>(row0) += fs;
 		f.segment<3>(row1) -= fs;
@@ -282,7 +279,6 @@ void DeformableSpring::computeEnergies_(Vector3d grav, Energy &ener) {
 		double L = m_nodes[i]->L;
 		double e = (l - L) / L;
 		ener.V = ener.V + 0.5 * m_K * e * e;
-
 	}
 }
 

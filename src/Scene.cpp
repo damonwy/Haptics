@@ -11,22 +11,21 @@
 //#include "Spring.h"
 #include "Deformable.h"
 #include "DeformableSpring.h"
-#include <boost/numeric/odeint.hpp>
+//#include <boost/numeric/odeint.hpp>
 #include "EigenOdeintHelper.h"
 
 using namespace std;
 using namespace Eigen;
 using json = nlohmann::json;
-using namespace boost::numeric::odeint;
+//using namespace boost::numeric::odeint;
 
 #include <unsupported/Eigen/MatrixFunctions> // TODO: avoid using this later, write a func instead
 
 Scene::Scene() :
 	t(0.0),
 	h(1e-2),
-	grav(0.0, 0.0, 0.0),
-	time_step(0),
-	drawHz(10)
+    drawHz(10),
+	grav(0.0, 0.0, 0.0)
 {
 }
 

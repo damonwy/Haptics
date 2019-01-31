@@ -12,9 +12,9 @@ Joint::Joint() {
 }
 
 Joint::Joint(shared_ptr<Body> body, int ndof, shared_ptr<Joint> parent) :
+m_ndof(ndof),
 m_body(body),
-m_parent(parent),
-m_ndof(ndof)
+m_parent(parent)
 {
 	if (parent == nullptr) {
 		m_name = "NULL-" + body->getName();
@@ -341,10 +341,9 @@ void Joint::scatterTauCon(VectorXd tauc) {
 void Joint::draw(shared_ptr<MatrixStack> MV, const shared_ptr<Program> prog, const shared_ptr<Program> progSimple, shared_ptr<MatrixStack> P) const {
 
 	progSimple->bind();
-	glUniformMatrix4fv(prog->getUniform("P"), 1, GL_FALSE, glm::value_ptr(P->topMatrix()));
 	MV->pushMatrix();
 	MV->multMatrix(eigen_to_glm(E_wj));
-	glUniformMatrix4fv(prog->getUniform("MV"), 1, GL_FALSE, glm::value_ptr(MV->topMatrix()));
+	glUniformMatrix4fv(progSimple->getUniform("MV"), 1, GL_FALSE, glm::value_ptr(MV->topMatrix()));
 	
 	glLineWidth(5);
 	glBegin(GL_LINES);
