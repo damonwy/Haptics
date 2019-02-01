@@ -21,13 +21,13 @@ public:
 	void setStiffness(double K) { m_K = K; }
 	void setMass(double mass) { m_mass = mass; }
 	void setAttachments(std::shared_ptr<Body> body0, Vector3d r0, std::shared_ptr<Body> body1, Vector3d r1);
-
+	virtual void load(const std::string &RESOURCE_DIR);
 protected:
 	int m_n_nodes;
 	int m;
 
 	void init_();
-	virtual void load(const std::string &RESOURCE_DIR);
+	
 	void draw_(std::shared_ptr<MatrixStack> MV, const std::shared_ptr<Program> prog, const std::shared_ptr<Program> progSimple, std::shared_ptr<MatrixStack> P) const;
 
 	void countDofs_(int &nm, int &nr);

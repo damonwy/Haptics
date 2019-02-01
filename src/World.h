@@ -154,11 +154,13 @@ public:
 	
 	std::shared_ptr<DeformableSpring> addDeformableSpring(
 		double mass, 
+		double k, /*stiffness*/
 		int n_points, 
 		std::shared_ptr<Body> body0, 
 		Vector3d r0, 
 		std::shared_ptr<Body> body1, 
-		Vector3d r1);
+		Vector3d r1,
+		const std::string &RESOURCE_DIR);
 
 	std::shared_ptr<ConstraintNull> addConstraintNull();
 	std::shared_ptr<DeformableNull> addDeformableNull();
@@ -166,6 +168,7 @@ public:
 	std::shared_ptr<CompNull> addCompNull();
 	std::shared_ptr<WrapObst> addWrapNull();
 	std::shared_ptr<SpringNull> addSpringNull();
+	std::shared_ptr<MuscleNull> addMuscleNull();
 
 	std::shared_ptr<CompSphere> addCompSphere(
 		double r, 

@@ -15,7 +15,7 @@ Muscle::Muscle() {
 Muscle::Muscle(std::vector<std::shared_ptr<Body>> bodies, int n_nodes):
 m_bodies(bodies), m_n_nodes(n_nodes)
 {
-	int n_bodies = static_cast<int>(bodies.size());
+	m_n_bodies = static_cast<int>(bodies.size());
 	for (int i = 0; i < n_nodes; i++) {
 		auto node = make_shared<Node>();
 		node->r = 0.2;

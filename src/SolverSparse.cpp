@@ -581,7 +581,9 @@ VectorXd SolverSparse::dynamics(VectorXd y)
 
 					solver.factorize(LHS_sp);
 					qdot1 = solver.solve(rhs).segment(0, nr);
-					//cout << qdot1 << endl;
+					cout << MatrixXd(LHS_sp) << endl << endl;
+					cout << rhs << endl << endl;
+					cout << qdot1 << endl;
 					break;
 				}		
 			default:

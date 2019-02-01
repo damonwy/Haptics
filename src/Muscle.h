@@ -68,6 +68,7 @@ public:
     std::string m_name;
     int m_uid;
 	int m_n_nodes;
+	int m_n_bodies;
 
     double m_mass;   
     double m_K;

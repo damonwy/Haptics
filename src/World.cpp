@@ -286,9 +286,9 @@ void World::load(const std::string &RESOURCE_DIR) {
 		}
 
 		// Init springs
-		auto deformable0 = addDeformableSpring(sides.x()*sides.y()*sides.z() * density, 3, nullptr, Vector3d(10.0 * m_nbodies + 10.0, 10.0, 0.0), m_bodies[m_nbodies - 1], Vector3d(5.0, 0.0, 0.0));
+		auto deformable0 = addDeformableSpring(sides.x()*sides.y()*sides.z() * density, m_stiffness, 3, nullptr, Vector3d(10.0 * m_nbodies + 10.0, 10.0, 0.0), m_bodies[m_nbodies - 1], Vector3d(5.0, 0.0, 0.0), RESOURCE_DIR);
 		deformable0->setStiffness(m_stiffness);
-		auto deformable1 = addDeformableSpring(sides.x()*sides.y()*sides.z() * density, 2, m_bodies[0], Vector3d(0.0, 0.0, 0.0), m_bodies[m_nbodies - 1], Vector3d(0.0, 0.0, 0.0));
+		auto deformable1 = addDeformableSpring(sides.x()*sides.y()*sides.z() * density, m_stiffness, 2, m_bodies[0], Vector3d(0.0, 0.0, 0.0), m_bodies[m_nbodies - 1], Vector3d(0.0, 0.0, 0.0), RESOURCE_DIR);
 		deformable1->setStiffness(m_stiffness);
 		for (int i = 0; i < (int)m_deformables.size(); i++) {
 			m_deformables[i]->load(RESOURCE_DIR);
@@ -649,7 +649,7 @@ void World::load(const std::string &RESOURCE_DIR) {
 		}
 		//m_joints[0]->m_q(0) = -M_PI / 2.0;
 		//m_joints[1]->m_q(0) = -M_PI / 2.0;
-
+		//addDeformableSpring(10.0, 0.0, 2, m_bodies[0], Vector3d(-5.0, 0.0, 0.0), m_bodies[1], Vector3d(0.0, 0.0, 0.0), RESOURCE_DIR);
 		/*auto spring = make_shared<SpringDamper>(m_bodies[0], Vector3d(-5.0, 0.0, 0.0), m_bodies[1], Vector3d(0.0, 0.0, 0.0));
 		m_springs.push_back(spring);
 		m_nsprings++;
@@ -660,7 +660,7 @@ void World::load(const std::string &RESOURCE_DIR) {
 		related_bodies.push_back(m_bodies[0]);
 		related_bodies.push_back(m_bodies[1]);
 
-		auto muscle = make_shared<MuscleSpring>(related_bodies, 2);
+		auto muscle = make_shared<MuscleSpring>(related_bodies, 20);
 		m_muscles.push_back(muscle);
 		m_nmuscles++;
 		muscle->setAttachments(m_bodies[0], Vector3d(-5.0, 0.0, 0.0), m_bodies[1], Vector3d(0.0, 0.0, 0.0));
@@ -792,13 +792,14 @@ shared_ptr<ConstraintJointLimit> World::addConstraintJointLimit(shared_ptr<Joint
 	return constraint;
 }
 
-shared_ptr<DeformableSpring> World::addDeformableSpring(double mass, int n_points, shared_ptr<Body> body0, Vector3d r0, shared_ptr<Body> body1, Vector3d r1) {
+shared_ptr<DeformableSpring> World::addDeformableSpring(double mass, double k, int n_points, shared_ptr<Body> body0, Vector3d r0, shared_ptr<Body> body1, Vector3d r1, const string &RESOURCE_DIR) {
 
 	auto deformable = make_shared<DeformableSpring>(n_points, m_countS, m_countCM);
 	m_deformables.push_back(deformable);
-	deformable->setStiffness(m_stiffness);
+	deformable->setStiffness(k);
 	deformable->setMass(mass);
 	deformable->setAttachments(body0, r0, body1, r1);
+	deformable->load(RESOURCE_DIR);
 	m_ndeformables++;
 	return deformable;
 }
@@ -895,6 +896,14 @@ shared_ptr<SpringNull> World::addSpringNull() {
 	m_nsprings++;
 	m_springs.push_back(spring);
 	return spring;
+}
+
+std::shared_ptr<MuscleNull> World::addMuscleNull()
+{
+	auto muscle = make_shared<MuscleNull>();
+	m_nmuscles++;
+	m_muscles.push_back(muscle);
+	return muscle;
 }
 
 shared_ptr<WrapSphere> World::addWrapSphere(shared_ptr<Body> b0, Vector3d r0, shared_ptr<Body> b1, Vector3d r1, shared_ptr<CompSphere> compSphere, int num_points, const string &RESOURCE_DIR) {
@@ -1063,6 +1072,10 @@ void World::init() {
 		if (i < m_nmuscles - 1) {
 			m_muscles[i]->next = m_muscles[i + 1];
 		}
+	}
+
+	if (m_nmuscles == 0) {
+		addMuscleNull();
 	}
 
 	int tet = nm;

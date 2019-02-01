@@ -27,14 +27,6 @@ void MuscleSpring::init_()
 	}
 
 	update_();
-
-	// Compute the rest lengths
-	//for (int i = 0; i < m_n_nodes - 1; i++) {
-	//	Vector3d x0 = m_nodes[i]->x;
-	//	Vector3d x1 = m_nodes[i + 1]->x;
-	//	Vector3d dx = x1 - x0;
-	//	m_nodes[i]->L = dx.norm(); // rest length
-	//}
 }
 
 void MuscleSpring::update_() {
@@ -101,7 +93,6 @@ void MuscleSpring::draw_(std::shared_ptr<MatrixStack> MV, const std::shared_ptr<
 	}
 	glEnd();
 	progSimple->unbind();
-
 }
 
 void MuscleSpring::computeMass_(Eigen::MatrixXd & M)
@@ -130,6 +121,15 @@ void MuscleSpring::computeEnergies_(Vector3d grav, Energy & ener)
 
 void MuscleSpring::computeJacobian_(Eigen::MatrixXd & J)
 {
+	// This function goes first
+	for (int i = 0; i < m_n_bodies; i++) {
+		for (int j = 0; j < 6; j++) {
+			// For each related body, perturb 
+
+
+
+		}
+	}
 }
 
 void MuscleSpring::computeJacobianSparse_(std::vector<T>& J_)
