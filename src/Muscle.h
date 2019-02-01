@@ -20,13 +20,16 @@ class Muscle {
     
 public:
     Muscle();
-    Muscle(std::vector<std::shared_ptr<Body>>);
+    Muscle(std::vector<std::shared_ptr<Body>>, int n_nodes);
     virtual ~Muscle() {}
     
     void setDamping(double damping) { m_damping = damping; }
     
-    virtual void load(const std::string &RESOURCE_DIR) {}
+	virtual void load(const std::string &RESOURCE_DIR);
     void init();
+	void update();
+
+
     void gatherDofs(Eigen::VectorXd &y, int nr);
     void gatherDDofs(Eigen::VectorXd &ydot, int nr);
     void scatterDofs(Eigen::VectorXd &y, int nr);
@@ -45,9 +48,9 @@ public:
     
     void draw(std::shared_ptr<MatrixStack> MV, const std::shared_ptr<Program> prog, const std::shared_ptr<Program> progSimple, std::shared_ptr<MatrixStack> P) const;
     
-    virtual void init_() {}
+	virtual void init_();
     virtual void draw_(std::shared_ptr<MatrixStack> MV, const std::shared_ptr<Program> prog, const std::shared_ptr<Program> progSimple, std::shared_ptr<MatrixStack> P) const {}
-    
+	virtual void update_() {}
     virtual void gatherDofs_(Eigen::VectorXd &y, int nr) {}
     virtual void gatherDDofs_(Eigen::VectorXd &ydot, int nr) {}
     virtual void scatterDofs_(Eigen::VectorXd &y, int nr) {}
@@ -61,19 +64,21 @@ public:
     virtual void computeEnergies_(Vector3d grav, Energy &ener) {}
     virtual void computeJacobian_(Eigen::MatrixXd &J) {}
     virtual void computeJacobianSparse_(std::vector<T> &J_) {}
-    
-    std::shared_ptr<Muscle> next;
+
     std::string m_name;
     int m_uid;
-    
-    std::vector<std::shared_ptr<Node>> m_nodes;
+	int m_n_nodes;
+
+    double m_mass;   
     double m_K;
-    double m_damping;
+    double m_damping;  
+
+    std::vector<std::shared_ptr<Node>> m_nodes;
     std::vector<std::shared_ptr<Body>> m_bodies;
     Eigen::Vector3d m_r0;
-    Eigen::Vector3d m_r1;
-    
-    double m_mass;
+    Eigen::Vector3d m_r1;    
+ 
+	std::shared_ptr<Muscle> next;
 };
 
 #endif // HAPTICS_SRC_MUSCLE_H_

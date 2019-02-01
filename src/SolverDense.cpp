@@ -217,8 +217,8 @@ Eigen::VectorXd SolverDense::dynamics(Eigen::VectorXd y)
 			rowsM.clear();
 
 			constraint0->getActiveList(rowsM, rowsR);
-			nim = rowsM.size();
-			nir = rowsR.size();
+			nim = static_cast<int>(rowsM.size());
+			nir = static_cast<int>(rowsR.size());
 			ni = nim + nir;
 
 			if (ni > 0) {
@@ -248,8 +248,8 @@ Eigen::VectorXd SolverDense::dynamics(Eigen::VectorXd y)
 			qdot1 = MDKr_.ldlt().solve(fr_);
 		}
 		else if (ne > 0 && ni == 0) {  // Just equality
-			int rows = MDKr_.rows() + G.rows();
-			int cols = MDKr_.cols() + G.rows();
+			int rows = static_cast<int>(MDKr_.rows() + G.rows());
+			int cols = static_cast<int>(MDKr_.cols() + G.rows());
 			MatrixXd LHS(rows, cols);
 			VectorXd rhs(rows);
 			LHS.setZero();
@@ -448,8 +448,8 @@ shared_ptr<Solution> SolverDense::solve() {
 				rowsM.clear();
 
 				constraint0->getActiveList(rowsM, rowsR);
-				nim = rowsM.size();
-				nir = rowsR.size();
+				nim = static_cast<int>(rowsM.size());
+				nir = static_cast<int>(rowsR.size());
 				ni = nim + nir;
 
 				if (ni > 0) {
@@ -467,8 +467,8 @@ shared_ptr<Solution> SolverDense::solve() {
 				qdot1 = MDKr_.ldlt().solve(fr_);
 			}
 			else if (ne > 0 && ni == 0) {  // Just equality
-				int rows = MDKr_.rows() + G.rows();
-				int cols = MDKr_.cols() + G.rows();
+				int rows = static_cast<int>(MDKr_.rows() + G.rows());
+				int cols = static_cast<int>(MDKr_.cols() + G.rows());
 				MatrixXd LHS(rows, cols);
 				VectorXd rhs(rows);
 				LHS.setZero();

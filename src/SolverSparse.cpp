@@ -18,8 +18,6 @@
 #include "ConstraintAttachSpring.h"
 #include "QuadProgMosek.h"
 
-
-
 using namespace std;
 using namespace Eigen;
 
@@ -239,7 +237,7 @@ VectorXd SolverSparse::dynamics(VectorXd y)
 			zero.resize(ne, ne);
 
 			deformable0->computeJacobianSparse(J_);		
-			J_vec_idx = J_.size();
+			J_vec_idx = static_cast<int>(J_.size());
 		}
 
 #ifdef CHECK_ENERGY
@@ -280,8 +278,6 @@ VectorXd SolverSparse::dynamics(VectorXd y)
 			break;
 		}
 
-		
-			
 		body0->computeGrav(grav, fm);
 		body0->computeForceDampingSparse(tmp, Dm_);
 		deformable0->computeForce(grav, fm);
@@ -368,8 +364,8 @@ VectorXd SolverSparse::dynamics(VectorXd y)
 			rowsEM.clear();
 			rowsER.clear();
 			constraint0->getEqActiveList(rowsEM, rowsER);
-			nem = rowsEM.size();
-			ner = rowsER.size();
+			nem = static_cast<int>(rowsEM.size());
+			ner = static_cast<int>(rowsER.size());
 			ne = nem + ner;
 
 			if (ne > 0) {
@@ -438,8 +434,8 @@ VectorXd SolverSparse::dynamics(VectorXd y)
 			rowsM.clear();
 
 			constraint0->getActiveList(rowsM, rowsR);
-			nim = rowsM.size();
-			nir = rowsR.size();
+			nim = static_cast<int>(rowsM.size());
+			nir = static_cast<int>(rowsR.size());
 			ni = nim + nir;
 
 			if (ni > 0) {

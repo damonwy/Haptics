@@ -56,7 +56,7 @@ static void cursor_position_callback(GLFWwindow* window, double xmouse, double y
 {
 	int state = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT);
 	if(state == GLFW_PRESS) {
-		camera->mouseMoved(xmouse, ymouse);
+		camera->mouseMoved(static_cast<float>(xmouse), static_cast<float>(ymouse));
 	}
 }
 

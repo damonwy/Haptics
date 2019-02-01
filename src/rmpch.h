@@ -17,6 +17,10 @@
 
 #define _USE_MATH_DEFINES
 #include <cmath> 
+#include <string>
+#include <cstring>
+#include <cassert>
+
 
 #define GLEW_STATIC
 #include <GL/glew.h>
@@ -27,9 +31,6 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/transform.hpp>
 
-#include <string>
-#include <cstring>
-#include <cassert>
 #include <nlohmann/json.hpp>
 
 #include "SE3.h"

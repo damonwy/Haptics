@@ -52,7 +52,6 @@ private:
 	std::shared_ptr<World> m_world;
 	std::shared_ptr<Solver> m_solver;
 	std::shared_ptr<Solution> m_solution;
-
 };
 
 class Observer

@@ -42,6 +42,9 @@ class WrapObst;
 class WrapSphere;
 class WrapCylinder;
 class WrapDoubleCylinder;
+class Muscle;
+class MuscleSpring;
+class MuscleNull;
 class Line;
 class Node;
 class JointFree;
@@ -314,6 +317,7 @@ public:
 	int m_nconstraints;
 	int m_ncomps;
 	int m_nwraps;
+	int m_nmuscles;
 	
 	int m_dense_nm;
 	int m_dense_nr;
@@ -339,6 +343,7 @@ private:
 	std::vector<std::shared_ptr<Body>> m_bodies;
 	std::vector<std::shared_ptr<Comp>> m_comps;
 	std::vector<std::shared_ptr<WrapObst>> m_wraps;
+	std::vector<std::shared_ptr<Muscle>> m_muscles;
 	std::vector<std::shared_ptr<Joint>> m_joints;
 	std::vector<std::shared_ptr<Deformable>> m_deformables;
 	std::vector<std::shared_ptr<Spring>> m_springs;

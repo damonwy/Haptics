@@ -116,7 +116,7 @@ void Shape::draw(const shared_ptr<Program> prog) const
 	}*/
 	
 	// Draw
-	int count = posBuf.size()/3; // number of indices to be rendered
+	int count = static_cast<int>(posBuf.size()/3); // number of indices to be rendered
 	glDrawArrays(GL_TRIANGLES, 0, count);
 	
 	// Disable and unbind

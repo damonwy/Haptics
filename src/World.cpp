@@ -47,6 +47,10 @@
 #include "WrapDoubleCylinder.h"
 #include "Vector.h"
 
+#include "Muscle.h"
+#include "MuscleNull.h"
+#include "MuscleSpring.h"
+
 #include "Line.h"
 
 using namespace std;
@@ -54,14 +58,14 @@ using namespace Eigen;
 using json = nlohmann::json;
 
 World::World() :
-nm(0), nr(0), nR(0), nem(0), ner(0), ne(0), nim(0), nir(0), m_countS(0),m_countCM(0), m_nbodies(0), m_njoints(0), m_ndeformables(0), m_nsprings(0), m_ncomps(0), m_nwraps(0), m_constraints(0)
+nm(0), nr(0), nR(0), nem(0), ner(0), ne(0), nim(0), nir(0), m_countS(0),m_countCM(0), m_nbodies(0), m_njoints(0), m_ndeformables(0), m_nsprings(0), m_ncomps(0), m_nwraps(0), m_nconstraints(0), m_nmuscles(0)
 {
 	m_energy.K = 0.0;
 	m_energy.V = 0.0;
 }
 
 World::World(WorldType type) :
-nm(0), nr(0), nR(0), nem(0), ner(0), ne(0), nim(0), nir(0), m_countS(0),m_countCM(0),  m_nbodies(0), m_njoints(0), m_ndeformables(0), m_nsprings(0), m_ncomps(0), m_nwraps(0), m_type(type), m_constraints(0)
+nm(0), nr(0), nR(0), nem(0), ner(0), ne(0), nim(0), nir(0), m_countS(0),m_countCM(0),  m_nbodies(0), m_njoints(0), m_ndeformables(0), m_nsprings(0), m_ncomps(0), m_nwraps(0), m_type(type), m_nconstraints(0), m_nmuscles(0)
 
 {
 	m_energy.K = 0.0;
@@ -646,13 +650,21 @@ void World::load(const std::string &RESOURCE_DIR) {
 		//m_joints[0]->m_q(0) = -M_PI / 2.0;
 		//m_joints[1]->m_q(0) = -M_PI / 2.0;
 
-		auto spring = make_shared<SpringDamper>(m_bodies[0], Vector3d(-5.0, 0.0, 0.0), m_bodies[1], Vector3d(0.0, 0.0, 0.0));
+		/*auto spring = make_shared<SpringDamper>(m_bodies[0], Vector3d(-5.0, 0.0, 0.0), m_bodies[1], Vector3d(0.0, 0.0, 0.0));
 		m_springs.push_back(spring);
 		m_nsprings++;
 		spring->setStiffness(0.0);
 		spring->setDamping(0.0);
-		spring->load(RESOURCE_DIR);
+		spring->load(RESOURCE_DIR);*/
+		std::vector<std::shared_ptr<Body>> related_bodies;
+		related_bodies.push_back(m_bodies[0]);
+		related_bodies.push_back(m_bodies[1]);
 
+		auto muscle = make_shared<MuscleSpring>(related_bodies, 2);
+		m_muscles.push_back(muscle);
+		m_nmuscles++;
+		muscle->setAttachments(m_bodies[0], Vector3d(-5.0, 0.0, 0.0), m_bodies[1], Vector3d(0.0, 0.0, 0.0));
+		muscle->load(RESOURCE_DIR);
 	}
 	break;
 
@@ -1045,6 +1057,14 @@ void World::init() {
 		addDeformableNull();
 	}
 
+	for (int i = 0; i < m_nmuscles; i++) {
+
+		m_muscles[i]->init();
+		if (i < m_nmuscles - 1) {
+			m_muscles[i]->next = m_muscles[i + 1];
+		}
+	}
+
 	int tet = nm;
 
 
@@ -1072,6 +1092,7 @@ void World::update() {
 	m_comps[0]->update();
 	m_wraps[0]->update();
 	m_springs[0]->update();
+	m_muscles[0]->update();
 }
 
 int World::getNsteps() {
@@ -1133,6 +1154,7 @@ void World::draw(shared_ptr<MatrixStack> MV, const shared_ptr<Program> prog, con
 	m_comps[0]->draw(MV, prog, P);
 	m_wraps[0]->draw(MV, prog, progSimple, P);
 	m_springs[0]->draw(MV, prog, progSimple, P);
+	m_muscles[0]->draw(MV, prog, progSimple, P);
 	for (int i = 0; i < (int)m_floors.size(); ++i) {
 		drawFloor(m_floors[i], MV, progSimple, P);
 	}

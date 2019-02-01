@@ -50,7 +50,7 @@ void JointRevolute::draw_(shared_ptr<MatrixStack> MV, const shared_ptr<Program> 
 			alpha = 2.0;
 		}
 
-		MV->scale(alpha * m_draw_radius);
+		MV->scale(static_cast<float>(alpha * m_draw_radius));
 		glUniformMatrix4fv(prog->getUniform("MV"), 1, GL_FALSE, glm::value_ptr(MV->topMatrix()));
 		m_jointShape->draw(prog);
 		MV->popMatrix();

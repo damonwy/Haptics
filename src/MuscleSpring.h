@@ -1,40 +1,25 @@
-// DeformableSpring Non-zero rest-length serial springs
-//		A simple spring made up of a series of nodes. In the future, we may
-//		want to make this an abstract class and derive from it. 
-
 #pragma once
-#ifndef REDUCEDCOORD_SRC_DEFORMABLESPRING_H_
-#define REDUCEDCOORD_SRC_DEFORMABLESPRING_H_
 
-#include "Deformable.h"
+#include "Muscle.h"
 
 class Body;
 class Node;
 
-class DeformableSpring : public Deformable
+class MuscleSpring : public Muscle
 {
 public:
-	DeformableSpring();
-	DeformableSpring(int n_nodes, int &countS, int &countCM);
-	virtual ~DeformableSpring() {}
+	MuscleSpring() {}
+	MuscleSpring(std::vector<std::shared_ptr<Body>>, int n_nodes);
+	virtual ~MuscleSpring() {}
 
 	void setStiffness(double K) { m_K = K; }
 	void setMass(double mass) { m_mass = mass; }
 	void setAttachments(std::shared_ptr<Body> body0, Vector3d r0, std::shared_ptr<Body> body1, Vector3d r1);
 
 protected:
-	int m_n_nodes;
-	int m;
-
 	void init_();
-	virtual void load(const std::string &RESOURCE_DIR);
+	void update_();
 	void draw_(std::shared_ptr<MatrixStack> MV, const std::shared_ptr<Program> prog, const std::shared_ptr<Program> progSimple, std::shared_ptr<MatrixStack> P) const;
-
-	void countDofs_(int &nm, int &nr);
-	void gatherDofs_(Eigen::VectorXd &y, int nr);
-	void gatherDDofs_(Eigen::VectorXd &ydot, int nr);
-	void scatterDofs_(Eigen::VectorXd &y, int nr);
-	void scatterDDofs_(Eigen::VectorXd &ydot, int nr);
 
 	void computeMass_(Eigen::MatrixXd &M);
 	void computeMassSparse_(std::vector<T> &M_);
@@ -46,7 +31,6 @@ protected:
 	void computeJacobian_(Eigen::MatrixXd &J);
 	void computeJacobianSparse_(std::vector<T> &J_);
 
+	std::shared_ptr<Body> m_body0;
+	std::shared_ptr<Body> m_body1;
 };
-
-
-#endif // REDUCEDCOORD_SRC_DEFORMABLESPRING_H_

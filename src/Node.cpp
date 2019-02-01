@@ -104,8 +104,8 @@ void Node::draw(shared_ptr<MatrixStack> MV, const shared_ptr<Program> prog) cons
 {	
 	if(sphere) {
 		MV->pushMatrix();
-		MV->translate(x(0), x(1), x(2));
-		MV->scale(r);
+		MV->translate(static_cast<float>(x(0)), static_cast<float>(x(1)), static_cast<float>(x(2)));
+		MV->scale(static_cast<float>(r));
 		glUniformMatrix4fv(prog->getUniform("MV"), 1, GL_FALSE, glm::value_ptr(MV->topMatrix()));
 		sphere->draw(prog);
 		MV->popMatrix();

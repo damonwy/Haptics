@@ -36,7 +36,7 @@ struct Solution {
 	}
 
 	int getNsteps() {
-		return y.rows();
+		return static_cast<int>(y.rows());
 	}
 
 	void searchTime(double ti, int search_index, int &output_index, double &s) {

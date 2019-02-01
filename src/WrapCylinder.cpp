@@ -201,7 +201,7 @@ void WrapCylinder::draw_(shared_ptr<MatrixStack> MV, const shared_ptr<Program> p
 		}
 	}
 
-	glVertex3f(m_point_P->x(0), m_point_P->x(1), m_point_P->x(2));
+	glVertex3f(static_cast<GLfloat>(m_point_P->x(0)), static_cast<GLfloat>(m_point_P->x(1)), static_cast<GLfloat>(m_point_P->x(2)));
 	glEnd();
 
 	// Draw z axis
