@@ -78,6 +78,11 @@ void Node::update() {
 	update(this->parent->E_wi);
 }
 
+void Node::savePosition()
+{
+	x_s = x;
+}
+
 double Node::computePotentialEnergy(Vector3d grav) {
 	this->V = this->m * grav.transpose() * this->x;
 	return this->V;

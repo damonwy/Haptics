@@ -661,6 +661,7 @@ void World::load(const std::string &RESOURCE_DIR) {
 		related_bodies.push_back(m_bodies[1]);
 
 		auto muscle = make_shared<MuscleSpring>(related_bodies, 20);
+		muscle->setMass(10.0);
 		m_muscles.push_back(muscle);
 		m_nmuscles++;
 		muscle->setAttachments(m_bodies[0], Vector3d(-5.0, 0.0, 0.0), m_bodies[1], Vector3d(0.0, 0.0, 0.0));

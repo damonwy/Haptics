@@ -4,6 +4,7 @@
 
 class Body;
 class Node;
+class World;
 
 class MuscleSpring : public Muscle
 {
@@ -13,7 +14,7 @@ public:
 	virtual ~MuscleSpring() {}
 
 	void setStiffness(double K) { m_K = K; }
-	void setMass(double mass) { m_mass = mass; }
+	void setMass(double mass);
 	void setAttachments(std::shared_ptr<Body> body0, Vector3d r0, std::shared_ptr<Body> body1, Vector3d r1);
 
 protected:
@@ -28,8 +29,8 @@ protected:
 	void computeForceDampingSparse_(Vector3d grav, Eigen::VectorXd &f, std::vector<T> &D_);
 
 	void computeEnergies_(Vector3d grav, Energy &ener);
-	void computeJacobian_(Eigen::MatrixXd &J);
-	void computeJacobianSparse_(std::vector<T> &J_);
+	void computeJMJ_(Eigen::MatrixXd &J, std::shared_ptr<World> world);
+	void computeJMJSparse_(std::vector<T> &J_);
 
 	std::shared_ptr<Body> m_body0;
 	std::shared_ptr<Body> m_body1;

@@ -298,6 +298,7 @@ public:
 	std::shared_ptr<Deformable> getDeformable0() const { return m_deformables[0]; }
 	std::shared_ptr<Constraint> getConstraint0() const { return m_constraints[0]; }
 	std::shared_ptr<Spring> getSpring0() const { return m_springs[0]; }
+	std::shared_ptr<Muscle> getMuscle0() const { return m_muscles[0]; }
 
 	Vector2d getTspan() const { return m_tspan; }
 	int getNsteps();

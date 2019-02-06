@@ -13,6 +13,7 @@ class MatrixStack;
 class Program;
 class Node;
 class Body;
+class World;
 
 typedef Eigen::Triplet<double> T;
 
@@ -37,6 +38,9 @@ public:
     
     void computeJacobian(Eigen::MatrixXd &J);
     void computeJacobianSparse(std::vector<T> &J_);
+	void computeJMJ(Eigen::MatrixXd &J, std::shared_ptr<World> world);
+	void computeJMJSparse(std::vector<T> &J_, std::shared_ptr<World> world);
+
     void computeMass(Eigen::MatrixXd &M);
     void computeForce(Vector3d grav, Eigen::VectorXd &f);
     void computeMassSparse(std::vector<T> &M_);
@@ -64,6 +68,8 @@ public:
     virtual void computeEnergies_(Vector3d grav, Energy &ener) {}
     virtual void computeJacobian_(Eigen::MatrixXd &J) {}
     virtual void computeJacobianSparse_(std::vector<T> &J_) {}
+	virtual void computeJMJ_(Eigen::MatrixXd &J, std::shared_ptr<World> world) {}
+	virtual void computeJMJSparse_(std::vector<T> &J_,std::shared_ptr<World> world) {}
 
     std::string m_name;
     int m_uid;

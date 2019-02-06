@@ -2,14 +2,26 @@
 #include "MuscleSpring.h"
 #include "Body.h"
 #include "Node.h"
+#include "World.h"
+#include "Joint.h"
 
 using namespace std;
 using namespace Eigen;
 using json = nlohmann::json;
+#define EPSILON 1e-8
 
 MuscleSpring::MuscleSpring(std::vector<std::shared_ptr<Body>> bodies, int n_nodes):
 	Muscle(bodies, n_nodes)
 {
+}
+
+void MuscleSpring::setMass(double mass)
+{
+	m_mass = mass; 
+	double mass_i = m_mass / m_n_nodes;
+	for (int i = 0; i < m_n_nodes; ++i) {
+		m_nodes[i]->m = mass_i;
+	}
 }
 
 void MuscleSpring::setAttachments(std::shared_ptr<Body> body0, Vector3d r0, std::shared_ptr<Body> body1, Vector3d r1)
@@ -119,19 +131,43 @@ void MuscleSpring::computeEnergies_(Vector3d grav, Energy & ener)
 {
 }
 
-void MuscleSpring::computeJacobian_(Eigen::MatrixXd & J)
-{
+void MuscleSpring::computeJMJ_(Eigen::MatrixXd &JMJ, shared_ptr<World> world)
+{	
 	// This function goes first
+
+	VectorXd y0(2 * world->nr), yi;
+	world->getJoint0()->gatherDofs(y0, world->nr);
+	for (int i = 0; i < m_n_nodes; ++i) {
+		m_nodes[i]->savePosition();
+	}
+
+	
 	for (int i = 0; i < m_n_bodies; i++) {
-		for (int j = 0; j < 6; j++) {
-			// For each related body, perturb 
+		// For each related body, perturb 
+		yi = y0;
+		int idx = m_bodies[i]->getJoint()->idxR;
+		yi(idx) += EPSILON;
+		world->getJoint0()->scatterDofs(yi, world->nr);
+		world->getMuscle0()->update();
 
-
-
+		for (int j = 0; j < m_n_nodes; ++j) {
+			Vector3d diff = (m_nodes[j]->x - m_nodes[j]->x_s) / EPSILON;
+			m_nodes[j]->m_J.col(i) = diff;
 		}
 	}
+
+	// Ji computed 
+	// Restore the states
+	world->getJoint0()->scatterDofs(y0, world->nr);
+	world->getMuscle0()->update();
+
+	Matrix3d I3 = Matrix3d::Identity();
+	for (int i = 0; i < m_n_nodes; ++i) {
+		JMJ += m_nodes[i]->m * m_nodes[i]->m_J.transpose() * I3 * m_nodes[i]->m_J;
+	}
+
 }
 
-void MuscleSpring::computeJacobianSparse_(std::vector<T>& J_)
+void MuscleSpring::computeJMJSparse_(std::vector<T>& J_)
 {
 }

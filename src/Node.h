@@ -34,6 +34,8 @@ public:
 	void clearNormals();
 	void update(Eigen::Matrix4d E);
 	void update();	// update position wrt parent
+	void savePosition();
+
 
 	std::shared_ptr<Body> getParent() const { return this->parent; }
 
@@ -58,6 +60,7 @@ public:
 	Eigen::Vector3d x0;			// initial position
 	Eigen::Vector3d v0;			// initial velocity
 	Eigen::Vector3d x;			// position
+	Eigen::Vector3d x_s;		// save position
 	Eigen::Vector3d v;			// velocity
 	Eigen::Vector3d a;			// acceleration
 	Eigen::Vector3d normal;	

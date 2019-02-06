@@ -10,6 +10,8 @@
 #include "Body.h"
 #include "Joint.h"
 #include "Spring.h"
+#include "Muscle.h"
+#include "MuscleSpring.h"
 #include "SpringDamper.h"
 #include "Deformable.h"
 #include "DeformableSpring.h"
@@ -161,6 +163,9 @@ void SolverSparse::initMatrix(int nm, int nr, int nem, int ner, int nim, int nir
 	Cr.setZero();
 	Crdot.resize(nir, nr);
 	Crdot.setZero();
+
+	JMJ_mi.setZero();
+	Jf_mi.setZero();
 }
 
 VectorXd SolverSparse::dynamics(VectorXd y)
@@ -229,6 +234,7 @@ VectorXd SolverSparse::dynamics(VectorXd y)
 			deformable0 = m_world->getDeformable0();
 			constraint0 = m_world->getConstraint0();
 			spring0 = m_world->getSpring0();
+			muscle0 = m_world->getMuscle0();
 
 			t = m_world->getTspan()(0);
 			h = m_world->getH();
@@ -238,6 +244,10 @@ VectorXd SolverSparse::dynamics(VectorXd y)
 
 			deformable0->computeJacobianSparse(J_);		
 			J_vec_idx = static_cast<int>(J_.size());
+
+			JMJ_mi.resize(nr, nr);
+			Jf_mi.resize(nr);
+			// JMJdot_mi.resize
 		}
 
 #ifdef CHECK_ENERGY
@@ -278,6 +288,7 @@ VectorXd SolverSparse::dynamics(VectorXd y)
 			break;
 		}
 
+
 		body0->computeGrav(grav, fm);
 		body0->computeForceDampingSparse(tmp, Dm_);
 		deformable0->computeForce(grav, fm);
@@ -309,6 +320,9 @@ VectorXd SolverSparse::dynamics(VectorXd y)
 		}
 
 		spring0->computeForceStiffnessDampingSparse(fm, Km_, Dm_);
+		cout <<"JMJ_B:" << JMJ_mi << endl;
+		muscle0->computeJMJ(JMJ_mi, m_world);
+		cout << "JMJ_A:" << JMJ_mi << endl;
 
 		Km_sp.setFromTriplets(Km_.begin(), Km_.end());
 		Dm_sp.setFromTriplets(Dm_.begin(), Dm_.end());

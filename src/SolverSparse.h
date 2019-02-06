@@ -136,4 +136,9 @@ private:
 	Eigen::SparseLU<Eigen::SparseMatrix<double> > solver;
 	Eigen::SparseMatrix<double> D_sp;
 
+	// Muscle Inertia Matrix
+	Eigen::MatrixXd JMJ_mi;
+	Eigen::VectorXd Jf_mi;
+	Eigen::MatrixXd JMJdot_mi;
+
 };

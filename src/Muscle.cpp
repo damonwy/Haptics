@@ -3,6 +3,7 @@
 #include "Node.h"
 #include "Body.h"
 #include "Muscle.h"
+#include "World.h"
 
 using namespace std;
 using namespace Eigen;
@@ -22,7 +23,7 @@ m_bodies(bodies), m_n_nodes(n_nodes)
 		node->x = Vector3d::Zero();
 		node->v = Vector3d::Zero();
 		node->a = Vector3d::Zero();
-		node->m_J.resize(3, n_bodies);
+		node->m_J.resize(3, m_n_bodies);
 		m_nodes.push_back(node);
 	}
 }
@@ -94,6 +95,22 @@ void Muscle::computeJacobianSparse(std::vector<T> &J_) {
 	computeJacobianSparse_(J_);
 	if (next != nullptr) {
 		next->computeJacobianSparse(J_);
+	}
+}
+
+void Muscle::computeJMJ(Eigen::MatrixXd &JMJ, std::shared_ptr<World> world)
+{
+	computeJMJ_(JMJ, world);
+	if (next != nullptr) {
+		next->computeJMJ(JMJ, world);
+	}
+}
+
+void Muscle::computeJMJSparse(std::vector<T>& JMJ_, std::shared_ptr<World> world)
+{
+	computeJMJSparse_(JMJ_, world);
+	if (next != nullptr) {
+		next->computeJMJSparse(JMJ_, world);
 	}
 }
 
