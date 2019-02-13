@@ -8,6 +8,7 @@ public:
 	SolverSparse() {}
 	SolverSparse(std::shared_ptr<World> world, Integrator integrator, SparseSolver solver) : Solver(world, integrator), m_sparse_solver(solver) {}
 	Eigen::VectorXd dynamics(Eigen::VectorXd y);
+	Eigen::VectorXd dynamics_matlab(Eigen::VectorXd y);
 	void test(const Eigen::VectorXd &x, Eigen::VectorXd &dxdt, const double);
 	void initMatrix(int nm, int nr, int nem, int ner, int nim, int nir);
 
@@ -139,6 +140,8 @@ private:
 	// Muscle Inertia Matrix
 	Eigen::MatrixXd JMJ_mi;
 	Eigen::VectorXd Jf_mi;
+	Eigen::VectorXd fvm;
+
 	Eigen::MatrixXd JMJdot_mi;
 
 };

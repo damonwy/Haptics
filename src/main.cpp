@@ -266,7 +266,7 @@ int main(int argc, char **argv)
 		return -1;
 	}
 	// Create a windowed mode window and its OpenGL context.
-	window = glfwCreateWindow(1920, 1080, "Reduced Coordinate Rigid Body FEM Simulation", NULL, NULL);
+	window = glfwCreateWindow(600, 400, "Reduced Coordinate Rigid Body FEM Simulation", NULL, NULL);
 	if(!window) {
 		glfwTerminate();
 		return -1;

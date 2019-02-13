@@ -166,6 +166,7 @@ void SolverSparse::initMatrix(int nm, int nr, int nem, int ner, int nim, int nir
 
 	JMJ_mi.setZero();
 	Jf_mi.setZero();
+	fvm.setZero();
 }
 
 VectorXd SolverSparse::dynamics(VectorXd y)
@@ -247,6 +248,7 @@ VectorXd SolverSparse::dynamics(VectorXd y)
 
 			JMJ_mi.resize(nr, nr);
 			Jf_mi.resize(nr);
+			fvm.resize(nr);
 			// JMJdot_mi.resize
 		}
 
@@ -323,6 +325,10 @@ VectorXd SolverSparse::dynamics(VectorXd y)
 		cout <<"JMJ_B:" << JMJ_mi << endl;
 		muscle0->computeJMJ(JMJ_mi, m_world);
 		cout << "JMJ_A:" << JMJ_mi << endl;
+		muscle0->computeForce(grav, Jf_mi);
+		cout << "Jf_mi" << Jf_mi << endl;
+		muscle0->computeJMJdotqdot(fvm, qdot0, m_world);
+		cout << "fvm" << fvm << endl;
 
 		Km_sp.setFromTriplets(Km_.begin(), Km_.end());
 		Dm_sp.setFromTriplets(Dm_.begin(), Dm_.end());
@@ -338,7 +344,7 @@ VectorXd SolverSparse::dynamics(VectorXd y)
 		J_t_sp = J_sp.transpose();
 
 		Mr_sp = J_t_sp * (Mm_sp - hsquare * K_sp) * J_sp;
-		
+		cout << "I "<< JMJ_mi + MatrixXd(Mr_sp) << endl << endl;
 		//Mr_sp_temp = Mr_sp.transpose();
 		//Mr_sp += Mr_sp_temp;
 		//Mr_sp *= 0.5;
@@ -725,6 +731,39 @@ VectorXd SolverSparse::dynamics(VectorXd y)
 		break;
 	}
 }
+
+Eigen::VectorXd SolverSparse::dynamics_matlab(Eigen::VectorXd y) {
+	// Parameters
+	double M = 10.0;
+	double L = 10.0;
+	double l = 1.0;
+	double r = 0.5;
+	double g = -9.81;
+	double mu0 = 1.0;
+	double mu1 = 1.0;
+	double mum = 1.0;
+
+	// Unpack data
+	q0 = y.segment(0, nr);
+	qdot0 = y.segment(nr, nr);
+	double c0 = cos(q0(0));
+	double s0 = sin(q0(0));
+	double c1 = cos(q0(1));
+	double s1 = sin(q0(1));
+	double c01 = cos(q0(0) + q0(1));
+	double s01 = sin(q0(0) + q0(1));
+
+	// Compute inertia
+	Matrix2d I0, I1;
+	I0 << l * l, 0.0, 0.0, 0.0;
+	I0 *= mu0 / 3.0;
+
+	I1 << 1 + 3.0 * l *(l + c1), 1 + 1.5*l*c1, 1 + 1.5*l*c1, 1;
+	I1 *= mu1 / 3.0;
+
+
+}
+
 
 void SolverSparse::test(const Eigen::VectorXd &x, Eigen::VectorXd &dxdt, const double) {
 	dynamics(x);

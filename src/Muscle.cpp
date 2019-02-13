@@ -24,6 +24,12 @@ m_bodies(bodies), m_n_nodes(n_nodes)
 		node->v = Vector3d::Zero();
 		node->a = Vector3d::Zero();
 		node->m_J.resize(3, m_n_bodies);
+		node->m_Jdot.reserve(m_n_bodies);// need to modify 
+		Matrix3x2d temp;
+		temp.setZero();
+		node->m_Jdot.push_back(temp);
+		node->m_Jdot.push_back(temp);
+
 		m_nodes.push_back(node);
 	}
 }
@@ -125,6 +131,14 @@ void Muscle::computeForce(Vector3d grav, Eigen::VectorXd &f) {
 	computeForce_(grav, f);
 	if (next != nullptr) {
 		next->computeForce(grav, f);
+	}
+}
+
+void Muscle::computeJMJdotqdot(Eigen::VectorXd & f, const Eigen::VectorXd &qdot, std::shared_ptr<World> world)
+{
+	computeJMJdotqdot_(f, qdot, world);
+	if (next != nullptr) {
+		next->computeJMJdotqdot(f, qdot, world);
 	}
 }
 

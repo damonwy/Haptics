@@ -43,6 +43,8 @@ public:
 
     void computeMass(Eigen::MatrixXd &M);
     void computeForce(Vector3d grav, Eigen::VectorXd &f);
+	void computeJMJdotqdot(Eigen::VectorXd &f, const Eigen::VectorXd &qdot, std::shared_ptr<World> world);
+
     void computeMassSparse(std::vector<T> &M_);
     
     void computeForceDamping(Vector3d grav, Eigen::VectorXd &f, Eigen::MatrixXd &D);
@@ -70,6 +72,7 @@ public:
     virtual void computeJacobianSparse_(std::vector<T> &J_) {}
 	virtual void computeJMJ_(Eigen::MatrixXd &J, std::shared_ptr<World> world) {}
 	virtual void computeJMJSparse_(std::vector<T> &J_,std::shared_ptr<World> world) {}
+	virtual void computeJMJdotqdot_(Eigen::VectorXd & f, const Eigen::VectorXd &qdot, std::shared_ptr<World> world) {}
 
     std::string m_name;
     int m_uid;

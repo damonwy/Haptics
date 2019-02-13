@@ -83,6 +83,10 @@ void Node::savePosition()
 	x_s = x;
 }
 
+void Node::savePositionForJdot() {
+	x_ss = x;
+}
+
 double Node::computePotentialEnergy(Vector3d grav) {
 	this->V = this->m * grav.transpose() * this->x;
 	return this->V;
