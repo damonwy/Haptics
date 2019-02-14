@@ -23,7 +23,7 @@
 using namespace std;
 using namespace Eigen;
 
-#define CHECK_ENERGY
+//#define CHECK_ENERGY
 
 void SolverSparse::initMatrix(int nm, int nr, int nem, int ner, int nim, int nir) {
 	ni = nim + nir;
@@ -171,11 +171,9 @@ void SolverSparse::initMatrix(int nm, int nr, int nem, int ner, int nim, int nir
 
 VectorXd SolverSparse::dynamics(VectorXd y)
 {
+	cout << "Input:" << endl << y << endl << endl;
+
 	//SparseMatrix<double, RowMajor> G_sp;
-	switch (m_integrator)
-	{
-	case REDMAX_EULER:
-	{
 		if (step == 0) {
 			// constant during simulation
 			isCollided = false;
@@ -322,13 +320,13 @@ VectorXd SolverSparse::dynamics(VectorXd y)
 		}
 
 		spring0->computeForceStiffnessDampingSparse(fm, Km_, Dm_);
-		cout <<"JMJ_B:" << JMJ_mi << endl;
+		//cout <<"JMJ_B:" << JMJ_mi << endl;
 		muscle0->computeJMJ(JMJ_mi, m_world);
-		cout << "JMJ_A:" << JMJ_mi << endl;
+		//cout << "JMJ_A:" << JMJ_mi << endl;
 		muscle0->computeForce(grav, Jf_mi);
-		cout << "Jf_mi" << Jf_mi << endl;
+		//cout << "Jf_mi" << Jf_mi << endl;
 		muscle0->computeJMJdotqdot(fvm, qdot0, m_world);
-		cout << "fvm" << fvm << endl;
+		cout << "fk" << fvm << endl;
 
 		Km_sp.setFromTriplets(Km_.begin(), Km_.end());
 		Dm_sp.setFromTriplets(Dm_.begin(), Dm_.end());
@@ -343,13 +341,19 @@ VectorXd SolverSparse::dynamics(VectorXd y)
 
 		J_t_sp = J_sp.transpose();
 
-		Mr_sp = J_t_sp * (Mm_sp - hsquare * K_sp) * J_sp;
-		cout << "I "<< JMJ_mi + MatrixXd(Mr_sp) << endl << endl;
+		Mr_sp = J_t_sp * (Mm_sp - hsquare * K_sp) * J_sp + JMJ_mi;
+		// 
+		//cout << "I " << endl << MatrixXd(Mr_sp) << endl;
+		//cout << "JMJ_mi "<< JMJ_mi + MatrixXd(Mr_sp) << endl << endl;
 		//Mr_sp_temp = Mr_sp.transpose();
 		//Mr_sp += Mr_sp_temp;
 		//Mr_sp *= 0.5;
+	
+		fr_ = /*Mr_sp * qdot0 + h* */ (J_t_sp * (fm - Mm_sp * Jdot_sp * qdot0) + fr + Jf_mi + fvm); 
+		//
+		
+		cout << "fr " << endl << fr_ << endl;
 
-		fr_ = Mr_sp * qdot0 + h * (J_t_sp * (fm - Mm_sp * Jdot_sp * qdot0) + fr); 
 		MDKr_sp = Mr_sp + J_t_sp * (h * Dm_sp - hsquare * Km_sp) * J_sp + h * Dr_sp - hsquare * Kr_sp;
 		//cout << MatrixXd(MDKr_sp) << endl << endl;
 		//cout << "fm" << fm << endl << endl;
@@ -493,11 +497,12 @@ VectorXd SolverSparse::dynamics(VectorXd y)
 				exit(1);
 			}
 
-			qdot1 = cg.solveWithGuess(fr_, qdot0);
+			//qdot1 = cg.solveWithGuess(fr_, qdot0);
+			qddot = cg.solve(fr_);
 
-			cout << MatrixXd(MDKr_sp) << endl << endl;
+			/*cout << MatrixXd(MDKr_sp) << endl << endl;
 			cout << fr_ << endl << endl;
-			cout << qdot1 << endl;
+			cout << qdot1 << endl;*/
 		}
 		else if (ne > 0 && ni == 0) {  // Just equality
 			//int rows = nr + ne;
@@ -700,7 +705,14 @@ VectorXd SolverSparse::dynamics(VectorXd y)
 			VectorXd sol = program_->getPrimalSolution();
 			qdot1 = sol.segment(0, nr);
 		}
-		qddot = (qdot1 - qdot0) / h;
+
+		VectorXd ydot_matlab = dynamics_matlab(y);
+		VectorXd qddot_matlab = ydot_matlab.segment(nr, nr);
+		VectorXd qdot1_matlab = qddot_matlab * h + qdot0;
+		VectorXd q1_matlab = q0 + h * qdot1_matlab;
+		
+		//qddot = (qdot1 - qdot0) / h;
+		qdot1 = qddot * h + qdot0;
 		q1 = q0 + h * qdot1;
 		yk.segment(0, nr) = q1;
 		yk.segment(nr, nr) = qdot1;
@@ -708,44 +720,58 @@ VectorXd SolverSparse::dynamics(VectorXd y)
 		ydotk.segment(0, nr) = qdot1;
 		ydotk.segment(nr, nr) = qddot;
 
+		cout <<"qddot "<< endl << qddot << endl;
+		cout << "qddot_matlab"<<endl << qddot_matlab << endl;
+		cout << "diff qddot" << (qddot - qddot_matlab).norm() << endl;
+		
+		// Use the result of matlab for comparison
+		q1_matlab = q0 + h * qdot0;
+		//qdot1_matlab = qdot0;
+
+		yk.segment(0, nr) = q1_matlab;
+		yk.segment(nr, nr) = qdot1_matlab;
+		ydotk.segment(0, nr) = qdot0;
+		ydotk.segment(nr, nr) = qddot_matlab;
+
+		//cout << "yk" << endl << yk << endl;
+		//cout << "ydotk" << endl << ydotk << endl;
+
 		joint0->scatterDofs(yk, nr);
 		joint0->scatterDDofs(ydotk, nr);
-		joint0->reparam();
-		joint0->gatherDofs(yk, nr);
+		//joint0->reparam();
+		//joint0->gatherDofs(yk, nr);
 
 		deformable0->scatterDofs(yk, nr);
 		deformable0->scatterDDofs(ydotk, nr);
 
-		
-
 		step++;
 		return yk;
-	}
-	break;
-
-	case REDUCED_ODE45:
-		break;
-	case REDMAX_ODE45:
-		break;
-	default:
-		break;
-	}
 }
 
 Eigen::VectorXd SolverSparse::dynamics_matlab(Eigen::VectorXd y) {
+	VectorXd y_ = y;
+
 	// Parameters
 	double M = 10.0;
 	double L = 10.0;
 	double l = 1.0;
 	double r = 0.5;
-	double g = -9.81;
+	double g = 9.81;
 	double mu0 = 1.0;
 	double mu1 = 1.0;
 	double mum = 1.0;
 
 	// Unpack data
-	q0 = y.segment(0, nr);
-	qdot0 = y.segment(nr, nr);
+	VectorXd q0 = y.segment(0, nr);
+	q0(0) = y_(1);
+	q0(1) = y_(0);
+
+	q0(0) += M_PI / 2.0;
+
+	VectorXd qdot0 = y.segment(nr, nr);
+	qdot0(0) = y_(3);
+	qdot0(1) = y_(2);
+
 	double c0 = cos(q0(0));
 	double s0 = sin(q0(0));
 	double c1 = cos(q0(1));
@@ -754,20 +780,59 @@ Eigen::VectorXd SolverSparse::dynamics_matlab(Eigen::VectorXd y) {
 	double s01 = sin(q0(0) + q0(1));
 
 	// Compute inertia
-	Matrix2d I0, I1;
+	Matrix2d I0, I1, Im, I, dIdtheta1;
 	I0 << l * l, 0.0, 0.0, 0.0;
 	I0 *= mu0 / 3.0;
+	//cout << "I0 matlab" << endl << I0 << endl;
 
 	I1 << 1 + 3.0 * l *(l + c1), 1 + 1.5*l*c1, 1 + 1.5*l*c1, 1;
 	I1 *= mu1 / 3.0;
+	//cout << "I1 matlab" << endl << I1 << endl;
 
+	Im << l * l + r * r + 2 * l*r*c1, r*r + l * r*c1, r*r + l * r*c1, r*r;
+	Im *= mum / 3.0;
+	I = M * L * L * (I0 + I1 + Im);
+	//cout << "I matlab:" << endl << I << endl;
 
+	Matrix2d temp0, temp1;
+	temp0 << 1.0, 0.5, 0.5, 0.0;
+	temp1 << 2.0, 1.0, 1.0, 0.0;
+
+	dIdtheta1 = -s1 * (mu1*l*temp0 + mum / 3.0*l*r*temp1);
+	Vector2d fk = -qdot0(1)*dIdtheta1*qdot0;
+	fk(1) += 0.5*qdot0.transpose()*dIdtheta1*qdot0;
+
+	Vector2d fv0, fv1;
+	fv0 << l * s0, 0.0;
+	fv0 *= -0.5 * mu0 * g;
+	fv1 << 2 * l*s0 + s01, s01;
+	fv1 *= -0.5*mu1*g;
+
+	Vector2d fvm;
+	fvm << l * s0 + r * s01, r * s01;
+	fvm *= -0.5 * mum * g;
+
+	Vector2d f;
+	f = M * L * L * fk + M * L * (fv0 + fv1 + fvm);
+	
+	cout << "fk matlab:" << endl << M * L*L*fk << endl;
+	cout << "f matlab:" << endl << f << endl;
+	Vector2d qddot = I.ldlt().solve(f);
+	VectorXd ydot(4);
+	ydot << qdot0, qddot;
+
+	ydot(0) = qdot0(1);
+	ydot(1) = qdot0(0);
+	ydot(2) = qddot(1);
+	ydot(3) = qddot(0);
+
+	return ydot;
 }
 
 
 void SolverSparse::test(const Eigen::VectorXd &x, Eigen::VectorXd &dxdt, const double) {
-	dynamics(x);
-	dxdt = ydotk;
+	//dynamics(x);
+	//dxdt = ydotk;
 }
 
 
