@@ -217,6 +217,8 @@ void Body::computeMassSparse(vector<T> &M_) {
 
 void Body::computeGrav(Vector3d grav, Eigen::VectorXd &f) {
 	fcor = SE3::ad(phi).transpose() * M_i * phi;
+	cout << "fcor: " << fcor << endl;
+
 	R_wi = E_wi.block<3, 3>(0, 0);
 	R_iw = R_wi.transpose();
 	fgrav.setZero();

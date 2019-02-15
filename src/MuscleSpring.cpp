@@ -180,64 +180,143 @@ void MuscleSpring::computeJMJSparse_(std::vector<T>& J_)
 
 void MuscleSpring::computeJMJdotqdot_(Eigen::VectorXd & f, const Eigen::VectorXd & qdot, shared_ptr<World> world)
 {
-	VectorXd y0(2 * world->nr), ydot0(2*world->nr), yi, yj;
-	world->getJoint0()->gatherDofs(y0, world->nr);
-	world->getJoint0()->gatherDDofs(ydot0, world->nr);
-
-	//cout << "ydot0" << endl << ydot0 << endl;
-	//cout << "qdot0" << qdot << endl;
-
-
 	for (int i = 0; i < m_n_nodes; ++i) {	
 		auto node = m_nodes[i];
 		node->savePosition();
 		//node->m_Jdot.clear();
 	}
 
-	// Integrate a small time step
-	yi = y0;
-	ydot0.segment(0, world->nr) = qdot;
-	yi += EPSILON * ydot0;
-	cout << "yi " << endl << yi << endl;
+	VectorXd y0(2 * world->nr), ydot0(2 * world->nr), yi, yj;
+	world->getJoint0()->gatherDofs(y0, world->nr);
+	world->getJoint0()->gatherDDofs(ydot0, world->nr);
 
-
-	// Get new state
-	world->getJoint0()->scatterDofs(yi, world->nr);
-	world->getMuscle0()->update();
-
-	for (int t = 0; t < m_n_nodes; ++t) {
-		m_nodes[t]->savePositionForJdot(); // the postion is saved in x_ss
-	}
-	// Compute Jdot for each node in the new time t0+EPS
-	for (int i = 0; i < m_n_bodies; i++) {
-		// For each related body, perturb 
-		yj = yi;
+	for (int i = 0; i < m_n_bodies; ++i) {
+		// Compute Jdot for each node vector<3x2> 2 
+		yi = y0;
 		int idx = m_bodies[i]->getJoint()->idxR;
-		yj(idx) += EPSILON;
-		
-		world->getJoint0()->scatterDofs(yj, world->nr);
+		yi(idx) += EPSILON;
+		// before perturb
+		world->getJoint0()->scatterDofs(yi, world->nr);
 		world->getMuscle0()->update();
+		for (int t = 0; t < m_n_nodes; ++t) {
+			m_nodes[t]->savePositionForJdot();
+		}
+		// 
 
-		for (int j = 0; j < m_n_nodes; ++j) {
-			Vector3d diff = (m_nodes[j]->x - m_nodes[j]->x_ss) / EPSILON;
-			m_nodes[j]->m_Jdot.col(idx) = diff ; // attention: the corresponding rigid body
+		for (int j = 0; j < m_n_bodies; j++) {
+			// For each related body, perturb 
+			yj = yi;
+			int index = m_bodies[j]->getJoint()->idxR;
+			yj(index) += EPSILON;
+			//cout << "yj" << yj << endl;
+			world->getJoint0()->scatterDofs(yj, world->nr);
+			world->getMuscle0()->update();
+
+			for (int k = 0; k < m_n_nodes; ++k) {
+				Vector3d diff = (m_nodes[k]->x - m_nodes[k]->x_ss) / EPSILON;
+				m_nodes[k]->m_Jdot[idx].col(index) = diff;
+				
+				 // attention: the corresponding rigid body
+			}
 		}
 	}
 
-	// Jdoti computed 
-	for (int j = 0; j < m_n_nodes; ++j) {
-		auto node = m_nodes[j];
+	// Every node has m_dJdq now
+	VectorXd f_qvv0 = f;
+	VectorXd f_qvv1 = f;
 
-		cout << "j:" << j << endl << "m_J" << endl << m_nodes[j]->m_J << endl << endl;
-		cout << "j:" << j << endl << "m_Jdot" << endl << m_nodes[j]->m_Jdot << endl << endl;
-		MatrixXd diff = (node->m_J - node->m_Jdot) / EPSILON;
-		cout << "diff: " << endl <<  diff<< endl;
-		m_nodes[j]->m_Jdot = diff;
+	for (int i = 0; i < m_n_bodies; ++i) {
+		int idx = m_bodies[i]->getJoint()->idxR;
+		for (int j = 0; j < m_n_nodes; ++j) {
+			auto node = m_nodes[j];
+			MatrixXd Mnew = node->m * node->m_Jdot[idx].transpose() * node->m_Jdot[idx];
+			MatrixXd Mold = node->m * node->m_J.transpose() * node->m_J;
+			MatrixXd diff_M = (Mnew - Mold) / EPSILON;
+			node->m_dMdq[idx] = diff_M;
+
+			if (idx == 1) {
+				node->m_dMdq[idx].setZero();
+			}			
+			cout << "dMdq_" << idx << endl << node->m_dMdq[idx] << endl << endl;
+
+			f_qvv0(idx) += 0.5* qdot.transpose() * node->m_dMdq[idx] * qdot;
+		}
 	}
+	cout << "fqvv0:" << endl << f_qvv0 << endl << endl;
 
-	// Restore the states
-	world->getJoint0()->scatterDofs(y0, world->nr);
-	world->getMuscle0()->update();
+	Matrix2d dIdtheta;
+	dIdtheta.setZero();
+
+	for (int i = 0; i < m_n_bodies; ++i) {
+		int idx = m_bodies[i]->getJoint()->idxR;
+		for (int j = 0; j < m_n_nodes; ++j) {
+			auto node = m_nodes[j];
+			dIdtheta += node->m_dMdq[idx] * qdot(idx);
+			//cout << "idx: " << idx << "j: " << j << "dIdtheta " << endl <<node->m_dMdq[idx] * qdot(idx) << endl;
+			f_qvv1 += node->m_dMdq[idx]*qdot(idx)*qdot;
+		}
+	}
+	cout << "dIdtheta: " << endl << dIdtheta << endl;
+	cout << "fqvv1:" << endl << f_qvv1 << endl << endl;
+
+	//VectorXd y0(2 * world->nr), ydot0(2*world->nr), yi, yj;
+	//world->getJoint0()->gatherDofs(y0, world->nr);
+	//world->getJoint0()->gatherDDofs(ydot0, world->nr);
+
+	////cout << "ydot0" << endl << ydot0 << endl;
+	////cout << "qdot0" << qdot << endl;
+
+
+	//for (int i = 0; i < m_n_nodes; ++i) {	
+	//	auto node = m_nodes[i];
+	//	node->savePosition();
+	//	//node->m_Jdot.clear();
+	//}
+
+	//// Integrate a small time step
+	//yi = y0;
+	//ydot0.segment(0, world->nr) = qdot;
+	//yi += EPSILON * ydot0;
+	//cout << "yi " << endl << yi << endl;
+
+
+	//// Get new state
+	//world->getJoint0()->scatterDofs(yi, world->nr);
+	//world->getMuscle0()->update();
+
+	//for (int t = 0; t < m_n_nodes; ++t) {
+	//	m_nodes[t]->savePositionForJdot(); // the postion is saved in x_ss
+	//}
+	//// Compute Jdot for each node in the new time t0+EPS
+	//for (int i = 0; i < m_n_bodies; i++) {
+	//	// For each related body, perturb 
+	//	yj = yi;
+	//	int idx = m_bodies[i]->getJoint()->idxR;
+	//	yj(idx) += EPSILON;
+	//	
+	//	world->getJoint0()->scatterDofs(yj, world->nr);
+	//	world->getMuscle0()->update();
+
+	//	for (int j = 0; j < m_n_nodes; ++j) {
+	//		Vector3d diff = (m_nodes[j]->x - m_nodes[j]->x_ss) / EPSILON;
+	//		m_nodes[j]->m_Jdot.col(idx) = diff ; // attention: the corresponding rigid body
+	//	}
+	//}
+
+	//// Jdoti computed 
+	//for (int j = 0; j < m_n_nodes; ++j) {
+	//	auto node = m_nodes[j];
+
+	//	//cout << "j:" << j << endl << "m_J" << endl << m_nodes[j]->m_J << endl << endl;
+	//	//cout << "j:" << j << endl << "m_Jdot" << endl << m_nodes[j]->m_Jdot << endl << endl;
+	//	MatrixXd diff = (node->m_J - node->m_Jdot) / EPSILON;
+	//	//cout << "diff: " << endl <<  diff<< endl;
+	//	m_nodes[j]->m_Jdot = diff;
+	//}
+
+	//// Restore the states
+	//world->getJoint0()->scatterDofs(y0, world->nr);
+	//world->getMuscle0()->update();
 
 
 	//for (int i = 0; i < m_n_bodies; ++i) {
@@ -284,22 +363,22 @@ void MuscleSpring::computeJMJdotqdot_(Eigen::VectorXd & f, const Eigen::VectorXd
 	//MatrixXd Jdotqdot(3, m_n_bodies);
 	//Jdotqdot.setZero();
 
-	for (int j = 0; j < m_n_nodes; ++j) {
-		auto node = m_nodes[j];
-		/*
-		Jdotqdot.setZero();
+	//for (int j = 0; j < m_n_nodes; ++j) {
+	//	auto node = m_nodes[j];
+	//	/*
+	//	Jdotqdot.setZero();
 
-		for (int k = 0; k < m_n_bodies; ++k) {
-			int idx_k = m_bodies[k]->getJoint()->idxR;
-			Jdotqdot += node->m_Jdot[idx_k] * qdot(idx_k);
-		}*/
-		// Jdotqdot for one node is done
+	//	for (int k = 0; k < m_n_bodies; ++k) {
+	//		int idx_k = m_bodies[k]->getJoint()->idxR;
+	//		Jdotqdot += node->m_Jdot[idx_k] * qdot(idx_k);
+	//	}*/
+	//	// Jdotqdot for one node is done
 
-		// compute JTMJDOTQDOT
-		VectorXd fvec = node->m * node->m_J.transpose() * Matrix3d::Identity() * node->m_Jdot * qdot; // need to check the sign later
-		
-		f -= fvec;
+	//	// compute JTMJDOTQDOT
+	//	VectorXd fvec = node->m * node->m_J.transpose() * Matrix3d::Identity() * node->m_Jdot * qdot; // need to check the sign later
+	//	
+	//	f -= fvec;
 
-	}
+	//}
 
 }

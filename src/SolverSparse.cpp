@@ -799,8 +799,13 @@ Eigen::VectorXd SolverSparse::dynamics_matlab(Eigen::VectorXd y) {
 	temp1 << 2.0, 1.0, 1.0, 0.0;
 
 	dIdtheta1 = -s1 * (mu1*l*temp0 + mum / 3.0*l*r*temp1);
+	cout << "dIdtheta matlab" << endl << dIdtheta1 << endl;
+
 	Vector2d fk = -qdot0(1)*dIdtheta1*qdot0;
-	fk(1) += 0.5*qdot0.transpose()*dIdtheta1*qdot0;
+	cout << "test1" << endl << fk << endl;
+	double var = 0.5*qdot0.transpose()*dIdtheta1*qdot0;
+	fk(1) += var;
+	cout << "test2" << endl << var << endl;
 
 	Vector2d fv0, fv1;
 	fv0 << l * s0, 0.0;

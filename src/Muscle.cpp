@@ -24,12 +24,19 @@ m_bodies(bodies), m_n_nodes(n_nodes)
 		node->v = Vector3d::Zero();
 		node->a = Vector3d::Zero();
 		node->m_J.resize(3, m_n_bodies);
-		node->m_Jdot.resize(3, m_n_bodies);
-		//node->m_Jdot.reserve(m_n_bodies);// need to modify 
-		//Matrix3x2d temp;
-		//temp.setZero();
-		//node->m_Jdot.push_back(temp);
-		//node->m_Jdot.push_back(temp);
+		//node->m_Jdot.resize(3, m_n_bodies);
+
+		node->m_dMdq.reserve(m_n_bodies);// need to modify 
+		Matrix2x2d temp;
+		temp.setZero();
+		node->m_dMdq.push_back(temp);
+		node->m_dMdq.push_back(temp);
+
+		node->m_Jdot.reserve(m_n_bodies);// need to modify 
+		Matrix3x2d temp0;
+		temp0.setZero();
+		node->m_Jdot.push_back(temp0);
+		node->m_Jdot.push_back(temp0);
 
 		m_nodes.push_back(node);
 	}

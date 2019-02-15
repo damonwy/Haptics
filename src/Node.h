@@ -73,8 +73,9 @@ public:
 	std::shared_ptr<Shape> sphere;
 	
     Eigen::MatrixXd m_J; // Jacobian Mat wrt joints/bodies
-	//std::vector<Matrix3x2d> m_Jdot; // Jdot
-	Eigen::MatrixXd m_Jdot;
+	std::vector<Matrix3x2d> m_Jdot; // Jdot
+	//Eigen::MatrixXd m_Jdot;
+	std::vector<Matrix2x2d> m_dMdq;
 	bool attached;		
 	Eigen::Vector3d m_r;
 
