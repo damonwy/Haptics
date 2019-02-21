@@ -31,10 +31,12 @@ m_bodies(bodies), m_n_nodes(n_nodes)
 		Matrix3x2d temp;
 		temp.setZero();
 		node->m_dJdq.reserve(m_n_bodies);
+		node->m_dJdq_b.reserve(m_n_bodies);
 
 		// Now it's 2
 		for (int i = 0; i < m_n_bodies; ++i) {
 			node->m_dJdq.push_back(temp);
+			node->m_dJdq_b.push_back(temp);
 		}
 			
 		m_nodes.push_back(node);

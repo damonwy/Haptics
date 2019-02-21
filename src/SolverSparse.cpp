@@ -317,6 +317,9 @@ VectorXd SolverSparse::dynamics(VectorXd y)
 			}
 		}
 
+		Energy ener = m_world->computeEnergy();
+		
+
 		spring0->computeForceStiffnessDampingSparse(fm, Km_, Dm_);
 		//cout <<"JMJ_B:" << JMJ_mi << endl;
 		muscle0->computeJMJ(JMJ_mi, m_world);
@@ -362,7 +365,8 @@ VectorXd SolverSparse::dynamics(VectorXd y)
 
 		double K = 0.5*qdot0.transpose()*MatrixXd(MDKr_sp)*qdot0;
 		cout << "K" << endl << K << endl;
-
+		cout << "V" << endl << ener.V << endl;
+		cout << "K+V" << endl << K + ener.V << endl;
 		//cout << MatrixXd(MDKr_sp) << endl << endl;
 		//cout << "fm" << fm << endl << endl;
 		//cout << "fr" << fr << endl << endl;

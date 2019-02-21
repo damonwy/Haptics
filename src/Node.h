@@ -77,6 +77,7 @@ public:
 	Eigen::MatrixXd m_Jdot; // 3 x dofs
 	Eigen::MatrixXd m_Jdot_lhs;
 	std::vector<Matrix3x2d> m_dJdq; // 3 x dofs x dofs update later
+	std::vector<Matrix3x2d> m_dJdq_b;
 	std::vector<Matrix2x2d> m_dMdq;
 	bool attached;		
 	Eigen::Vector3d m_r;
