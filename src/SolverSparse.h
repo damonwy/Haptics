@@ -3,19 +3,29 @@
 #include "Solver.h"
 #include "KKTSolver.h"
 
-class SolverSparse : public Solver {
+class SolverSparse : public Solver, public std::enable_shared_from_this<SolverSparse> {
 public:
 	SolverSparse() {}
 	SolverSparse(std::shared_ptr<World> world, Integrator integrator, SparseSolver solver) : Solver(world, integrator), m_sparse_solver(solver) {}
 	Eigen::VectorXd dynamics(Eigen::VectorXd y);
 	Eigen::VectorXd dynamics_matlab(Eigen::VectorXd y);
+	Eigen::VectorXd dynamics_matlab2(Eigen::VectorXd y);
 	void test(const Eigen::VectorXd &x, Eigen::VectorXd &dxdt, const double);
 	void initMatrix(int nm, int nr, int nem, int ner, int nim, int nir);
+Eigen::MatrixXd J_dense;	// dense_nm x dense_nr
+	Eigen::MatrixXd Jdot_dense;
+	Eigen::MatrixXd JMJ_mi;
 
+	Eigen::SparseMatrix<double> Mm_sp;
+	Eigen::SparseMatrix<double> Mr_sp;
+	Eigen::VectorXd q0;
+	Eigen::VectorXd q1;
+	Eigen::VectorXd qdot0;
+	Eigen::VectorXd qdot1;
+	Eigen::VectorXd qddot;
 private:
 	bool isCollided;
 	SparseSolver m_sparse_solver;
-	Eigen::SparseMatrix<double> Mm_sp;
 	std::vector<T> Mm_;
 
 	Eigen::SparseMatrix<double> MDKr_sp;
@@ -28,8 +38,7 @@ private:
 	std::vector<T> Km_;
 
 	Eigen::VectorXd fm;
-	Eigen::MatrixXd J_dense;	// dense_nm x dense_nr
-	Eigen::MatrixXd Jdot_dense;
+	
 
 	Eigen::SparseMatrix<double> J_sp;
 	Eigen::SparseMatrix<double> J_t_sp;
@@ -38,16 +47,11 @@ private:
 	Eigen::SparseMatrix<double> Jdot_sp;
 	std::vector<T> Jdot_;
 
-	Eigen::VectorXd q0;
-	Eigen::VectorXd q1;
-	Eigen::VectorXd qdot0;
-	Eigen::VectorXd qdot1;
-	Eigen::VectorXd qddot;
+
 	Eigen::VectorXd rhs;
 	Eigen::VectorXd guess;
 
 	int J_vec_idx;
-	Eigen::SparseMatrix<double> Mr_sp;
 	Eigen::SparseMatrix<double> Mr_sp_temp;
 	Eigen::SparseMatrix<double> Dm_sp;
 	std::vector<T> Dm_;
@@ -138,7 +142,6 @@ private:
 	Eigen::SparseMatrix<double> D_sp;
 
 	// Muscle Inertia Matrix
-	Eigen::MatrixXd JMJ_mi;
 	Eigen::VectorXd Jf_mi;
 	Eigen::VectorXd fvm;
 

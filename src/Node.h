@@ -35,7 +35,7 @@ public:
 	void update(Eigen::Matrix4d E);
 	void update();	// update position wrt parent
 	void savePosition();
-	void savePositionForJdot();
+	void checkPoint2();
 
 	std::shared_ptr<Body> getParent() const { return this->parent; }
 
@@ -73,8 +73,10 @@ public:
 	std::shared_ptr<Shape> sphere;
 	
     Eigen::MatrixXd m_J; // Jacobian Mat wrt joints/bodies
-	std::vector<Matrix3x2d> m_Jdot; // Jdot
-	//Eigen::MatrixXd m_Jdot;
+	//std::vector<Matrix3x2d> m_Jdot; // Jdot
+	Eigen::MatrixXd m_Jdot; // 3 x dofs
+	Eigen::MatrixXd m_Jdot_lhs;
+	std::vector<Matrix3x2d> m_dJdq; // 3 x dofs x dofs update later
 	std::vector<Matrix2x2d> m_dMdq;
 	bool attached;		
 	Eigen::Vector3d m_r;

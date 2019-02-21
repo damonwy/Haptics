@@ -14,6 +14,8 @@ class Program;
 class Node;
 class Body;
 class World;
+class Solver;
+class SolverSparse;
 
 typedef Eigen::Triplet<double> T;
 
@@ -43,7 +45,7 @@ public:
 
     void computeMass(Eigen::MatrixXd &M);
     void computeForce(Vector3d grav, Eigen::VectorXd &f);
-	void computeJMJdotqdot(Eigen::VectorXd &f, const Eigen::VectorXd &qdot, std::shared_ptr<World> world);
+	void computeJMJdotqdot(Eigen::VectorXd &f, const Eigen::VectorXd &qdot, std::shared_ptr<World> world, std::shared_ptr<SolverSparse> solver);
 
     void computeMassSparse(std::vector<T> &M_);
     
@@ -72,7 +74,7 @@ public:
     virtual void computeJacobianSparse_(std::vector<T> &J_) {}
 	virtual void computeJMJ_(Eigen::MatrixXd &J, std::shared_ptr<World> world) {}
 	virtual void computeJMJSparse_(std::vector<T> &J_,std::shared_ptr<World> world) {}
-	virtual void computeJMJdotqdot_(Eigen::VectorXd & f, const Eigen::VectorXd &qdot, std::shared_ptr<World> world) {}
+	virtual void computeJMJdotqdot_(Eigen::VectorXd & f, const Eigen::VectorXd &qdot, std::shared_ptr<World> world, std::shared_ptr<SolverSparse> solver) {}
 
     std::string m_name;
     int m_uid;

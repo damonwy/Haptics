@@ -660,7 +660,7 @@ void World::load(const std::string &RESOURCE_DIR) {
 		related_bodies.push_back(m_bodies[0]);
 		related_bodies.push_back(m_bodies[1]);
 
-		auto muscle = make_shared<MuscleSpring>(related_bodies, 300);
+		auto muscle = make_shared<MuscleSpring>(related_bodies, 3);
 		muscle->setMass(10.0);
 		m_muscles.push_back(muscle);
 		m_nmuscles++;
@@ -1181,6 +1181,7 @@ Energy World::computeEnergy() {
 	m_joints[0]->computeEnergies(m_grav, m_energy);
 	m_deformables[0]->computeEnergies(m_grav, m_energy);
 	m_springs[0]->computeEnergies(m_grav, m_energy);
+	m_muscles[0]->computeEnergies(m_grav, m_energy);
 
 	if (m_t == 0.0) {
 		m_energy0 = m_energy;

@@ -4,6 +4,8 @@
 #include "Body.h"
 #include "Muscle.h"
 #include "World.h"
+#include "Solver.h"
+#include "SolverSparse.h"
 
 using namespace std;
 using namespace Eigen;
@@ -24,20 +26,17 @@ m_bodies(bodies), m_n_nodes(n_nodes)
 		node->v = Vector3d::Zero();
 		node->a = Vector3d::Zero();
 		node->m_J.resize(3, m_n_bodies);
-		//node->m_Jdot.resize(3, m_n_bodies);
-
-		node->m_dMdq.reserve(m_n_bodies);// need to modify 
-		Matrix2x2d temp;
+		node->m_Jdot.resize(3, m_n_bodies);
+		node->m_Jdot_lhs.resize(3, m_n_bodies);
+		Matrix3x2d temp;
 		temp.setZero();
-		node->m_dMdq.push_back(temp);
-		node->m_dMdq.push_back(temp);
+		node->m_dJdq.reserve(m_n_bodies);
 
-		node->m_Jdot.reserve(m_n_bodies);// need to modify 
-		Matrix3x2d temp0;
-		temp0.setZero();
-		node->m_Jdot.push_back(temp0);
-		node->m_Jdot.push_back(temp0);
-
+		// Now it's 2
+		for (int i = 0; i < m_n_bodies; ++i) {
+			node->m_dJdq.push_back(temp);
+		}
+			
 		m_nodes.push_back(node);
 	}
 }
@@ -142,11 +141,11 @@ void Muscle::computeForce(Vector3d grav, Eigen::VectorXd &f) {
 	}
 }
 
-void Muscle::computeJMJdotqdot(Eigen::VectorXd & f, const Eigen::VectorXd &qdot, std::shared_ptr<World> world)
+void Muscle::computeJMJdotqdot(Eigen::VectorXd & f, const Eigen::VectorXd &qdot, std::shared_ptr<World> world, std::shared_ptr<SolverSparse> solver)
 {
-	computeJMJdotqdot_(f, qdot, world);
+	computeJMJdotqdot_(f, qdot, world, solver);
 	if (next != nullptr) {
-		next->computeJMJdotqdot(f, qdot, world);
+		next->computeJMJdotqdot(f, qdot, world, solver);
 	}
 }
 

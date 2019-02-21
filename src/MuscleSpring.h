@@ -5,6 +5,8 @@
 class Body;
 class Node;
 class World;
+class SolverSparse;
+
 
 class MuscleSpring : public Muscle
 {
@@ -31,7 +33,7 @@ protected:
 	void computeEnergies_(Vector3d grav, Energy &ener);
 	void computeJMJ_(Eigen::MatrixXd &J, std::shared_ptr<World> world);
 	void computeJMJSparse_(std::vector<T> &J_);
-	void computeJMJdotqdot_(Eigen::VectorXd & f, const Eigen::VectorXd &qdot, std::shared_ptr<World> world);
+	void computeJMJdotqdot_(Eigen::VectorXd & f, const Eigen::VectorXd &qdot, std::shared_ptr<World> world, std::shared_ptr<SolverSparse> solver);
 
 	std::shared_ptr<Body> m_body0;
 	std::shared_ptr<Body> m_body1;
