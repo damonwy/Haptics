@@ -78,9 +78,13 @@ void Node::update() {
 	update(this->parent->E_wi);
 }
 
-void Node::savePosition()
+void Node::saveForwardPosition()
 {
-	x_s = x;
+	x_f = x;
+}
+
+void Node::saveBackwardPosition() {
+	x_b = x;
 }
 
 void Node::checkPoint2() {

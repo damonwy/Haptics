@@ -854,6 +854,7 @@ Eigen::VectorXd SolverSparse::dynamics_matlab(Eigen::VectorXd y) {
 	double v2 = -mu1 * g*(l*c0 + 0.5*c01);
 	double vm = -0.5*mum*g*(l*c0 + r * c01);
 	double V = M * L * (v1 + v2 + vm);
+
 	cout << "K matlab " << endl << K << endl;
 	cout << "V matlab " << endl << V << endl;
 	cout << "energy matlab " << endl << K + V << endl;
@@ -864,108 +865,6 @@ Eigen::VectorXd SolverSparse::dynamics_matlab(Eigen::VectorXd y) {
 void SolverSparse::test(const Eigen::VectorXd &x, Eigen::VectorXd &dxdt, const double) {
 	//dynamics(x);
 	//dxdt = ydotk;
-}
-
-Eigen::VectorXd SolverSparse::dynamics_matlab2(Eigen::VectorXd y) {
-	VectorXd y_ = y;
-
-	// Parameters
-	double M = 10.0;
-	double L = 10.0;
-	double l = 1.0;
-	double r = 0.5;
-	double g = 9.81;
-	double mu0 = 1.0;
-	double mu1 = 1.0;
-	double mum = 1.0;
-
-	// Unpack data
-	VectorXd q0 = y.segment(0, nr);
-	q0(0) = y_(1);
-	q0(1) = y_(0);
-
-	q0(0) += M_PI / 2.0;
-
-	VectorXd qdot0 = y.segment(nr, nr);
-	qdot0(0) = y_(3);
-	qdot0(1) = y_(2);
-
-	double c0 = cos(q0(0));
-	double s0 = sin(q0(0));
-	double c1 = cos(q0(1));
-	double s1 = sin(q0(1));
-	double c01 = cos(q0(0) + q0(1));
-	double s01 = sin(q0(0) + q0(1));
-
-	// Compute inertia
-	Matrix2d I0, I1, Im, I, dIdtheta1, dIdtheta1test;
-	I0 << l * l, 0.0, 0.0, 0.0;
-	I0 *= mu0 / 3.0;
-	//cout << "I0 matlab" << endl << I0 << endl;
-
-	I1 << 1 + 3.0 * l *(l + c1), 1 + 1.5*l*c1, 1 + 1.5*l*c1, 1;
-	I1 *= mu1 / 3.0;
-	//cout << "I1 matlab" << endl << I1 << endl;
-
-	Im << l * l + r * r + 2 * l*r*c1, r*r + l * r*c1, r*r + l * r*c1, r*r;
-	Im *= mum / 3.0;
-	I = M * L * L * (I0 + I1 + Im);
-	//cout << "I matlab:" << endl << I << endl;
-
-	Matrix2d temp0, temp1;
-	temp0 << 1.0, 0.5, 0.5, 0.0;
-	temp1 << 2.0, 1.0, 1.0, 0.0;
-
-	dIdtheta1 = -s1 * (mu1*l*temp0 + mum / 3.0*l*r*temp1);
-	dIdtheta1test = -s1 * (mu1*l*temp0);
-
-	Vector2d fk = -qdot0(1)*dIdtheta1*qdot0;
-	double var = 0.5*qdot0.transpose()*dIdtheta1*qdot0;
-	fk(1) += var;
-
-	Vector2d fv0, fv1;
-	fv0 << l * s0, 0.0;
-	fv0 *= -0.5 * mu0 * g;
-	fv1 << 2 * l*s0 + s01, s01;
-	fv1 *= -0.5*mu1*g;
-
-	Vector2d fvm;
-	fvm << l * s0 + r * s01, r * s01;
-	fvm *= -0.5 * mum * g;
-
-	Vector2d f;
-	f = M * L * L * fk + M * L * (fv0 + fv1 + fvm);
-
-	Vector2d fktest = -qdot0(1)*dIdtheta1test*qdot0;
-	double vartest = 0.5*qdot0.transpose()*dIdtheta1test*qdot0;
-	fktest(1) += vartest;
-	Vector2d f_0 = M * L * L * fktest + M * L * (fv0 + fv1);
-	Vector2d f_1 = M * L * fvm;
-	Vector2d f_2 = f - f_1 - f_0;
-#ifdef DEBUG_MATLAB
-	cout << "f_0 matlab:" << endl << f_0 << endl;
-	cout << "f_1 matlab:" << endl << f_1 << endl;
-	cout << "f_2 matlab:" << endl << f_2 << endl;
-	cout << "f matlab:" << endl << f << endl;
-#endif
-	Vector2d qddot = I.ldlt().solve(f);
-	VectorXd ydot(4);
-	ydot << qdot0, qddot;
-
-	ydot(0) = qdot0(1);
-	ydot(1) = qdot0(0);
-	ydot(2) = qddot(1);
-	ydot(3) = qddot(0);
-
-	double K = 0.5*qdot0.transpose()*I*qdot0;
-	double v1 = -0.5*mu0*g*l*c0;
-	double v2 = -mu1 * g*(l*c0 + 0.5*c01);
-	double vm = -0.5*mum*g*(l*c0 + r * c01);
-	double V = M * L * (v1 + v2 + vm);
-
-	cout << "energy matlab " << endl << K + V << endl;
-
-	return ydot;
 }
 
 

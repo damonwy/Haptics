@@ -33,8 +33,11 @@ protected:
 	void computeEnergies_(Vector3d grav, Energy &ener);
 	void computeJMJ_(Eigen::MatrixXd &J, std::shared_ptr<World> world);
 	void computeJMJSparse_(std::vector<T> &J_);
+	void forward(int i, Eigen::VectorXd q0, std::shared_ptr<World> world);
+	void backward(int i, Eigen::VectorXd q0, std::shared_ptr<World> world);
+	void recover(Eigen::VectorXd q0, std::shared_ptr<World> world);
 	void computeJMJdotqdot_(Eigen::VectorXd & f, const Eigen::VectorXd &qdot, std::shared_ptr<World> world, std::shared_ptr<SolverSparse> solver);
-
+	void computeJ(Eigen::VectorXd q0, std::shared_ptr<World> world);
 	std::shared_ptr<Body> m_body0;
 	std::shared_ptr<Body> m_body1;
 };

@@ -34,7 +34,9 @@ public:
 	void clearNormals();
 	void update(Eigen::Matrix4d E);
 	void update();	// update position wrt parent
-	void savePosition();
+	void saveForwardPosition();
+	void saveBackwardPosition();
+
 	void checkPoint2();
 
 	std::shared_ptr<Body> getParent() const { return this->parent; }
@@ -60,7 +62,8 @@ public:
 	Eigen::Vector3d x0;			// initial position
 	Eigen::Vector3d v0;			// initial velocity
 	Eigen::Vector3d x;			// position
-	Eigen::Vector3d x_s;		// save position
+	Eigen::Vector3d x_f;		// save forward position
+	Eigen::Vector3d x_b;		// backward position
 	Eigen::Vector3d x_ss;		// for Jdot
 	Eigen::Vector3d v;			// velocity
 	Eigen::Vector3d a;			// acceleration
