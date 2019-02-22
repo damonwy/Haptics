@@ -357,16 +357,16 @@ VectorXd SolverSparse::dynamics(VectorXd y)
 		
 		VectorXd f_0 = J_t_sp * (fm - Mm_sp * Jdot_sp * qdot0) + fr;
 #ifdef DEBUG_MATLAB
-		cout << "f_0" << endl << f_0 << endl;
-		cout << "f_1" << endl << Jf_mi << endl;
+		//cout << "f_0" << endl << f_0 << endl;
+		//cout << "f_1" << endl << Jf_mi << endl;
 		cout << "f_2" << endl << fvm << endl;
-		cout << "fr " << endl << fr_ << endl;
+		//cout << "fr " << endl << fr_ << endl;
 #endif
 
 		double K = 0.5*qdot0.transpose()*MatrixXd(MDKr_sp)*qdot0;
-		cout << "K" << endl << K << endl;
-		cout << "V" << endl << ener.V << endl;
-		cout << "K+V" << endl << K + ener.V << endl;
+		//cout << "K" << endl << K << endl;
+		//cout << "V" << endl << ener.V << endl;
+		cout << "energy c++" << endl << K + ener.V << endl;
 		//cout << MatrixXd(MDKr_sp) << endl << endl;
 		//cout << "fm" << fm << endl << endl;
 		//cout << "fr" << fr << endl << endl;
@@ -835,10 +835,10 @@ Eigen::VectorXd SolverSparse::dynamics_matlab(Eigen::VectorXd y) {
 	Vector2d f_1 = M * L * fvm;
 	Vector2d f_2 = f - f_1 - f_0;
 #ifdef DEBUG_MATLAB
-	cout << "f_0 matlab:" << endl << f_0 << endl;
-	cout << "f_1 matlab:" << endl << f_1 << endl;
+	//cout << "f_0 matlab:" << endl << f_0 << endl;
+	//cout << "f_1 matlab:" << endl << f_1 << endl;
 	cout << "f_2 matlab:" << endl << f_2 << endl;
-	cout << "f matlab:" << endl << f << endl;
+	//cout << "f matlab:" << endl << f << endl;
 #endif
 	Vector2d qddot = I.ldlt().solve(f);
 	VectorXd ydot(4);
@@ -855,8 +855,8 @@ Eigen::VectorXd SolverSparse::dynamics_matlab(Eigen::VectorXd y) {
 	double vm = -0.5*mum*g*(l*c0 + r * c01);
 	double V = M * L * (v1 + v2 + vm);
 
-	cout << "K matlab " << endl << K << endl;
-	cout << "V matlab " << endl << V << endl;
+	//cout << "K matlab " << endl << K << endl;
+	//cout << "V matlab " << endl << V << endl;
 	cout << "energy matlab " << endl << K + V << endl;
 	return ydot;
 }

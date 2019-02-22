@@ -202,49 +202,18 @@ void MuscleSpring::computeJMJdotqdot_(Eigen::VectorXd & f, const Eigen::VectorXd
 	VectorXd qdot0 = solver->qdot0;
 	VectorXd y0(2*world->nr), yi, yj;
 	y0 << q0, qdot0;
-	cout << "input states:" << endl << y0 << endl;
+	//cout << "input states:" << endl << y0 << endl;
 
-	// Jdot = dJdq * qdot
-
-	// Compute dJdq * qdot
+	// Compute Jdot = dJdq * qdot
 	for (int i = 0; i < m_n_bodies; ++i) {
 		// Compute Jdot for each node vector<3x2> 2 	
 		int idx = m_bodies[i]->getJoint()->idxR;
-		yi = y0;
-		yi(idx) += EPSILON;
-
-		for (int j = 0; j < m_n_bodies; j++) {
-			int index = m_bodies[j]->getJoint()->idxR;
-			forward(index, yi, world);
-			backward(index, yi, world);
-
-			for (int k = 0; k < m_n_nodes; ++k) {
-				//cout << "node : " << k << endl;
-				Vector3d diff = (m_nodes[k]->x_f - m_nodes[k]->x_b) / (2 * EPSILON);
-				//cout << "layer: idx " << idx << "col" << index << endl << diff << endl;
-				m_nodes[k]->m_dJdq[idx].col(index) = diff; // attention: the corresponding rigid body
-			}
-		}
+		computedJdq(y0, world, true, idx);
+		computedJdq(y0, world, false, idx);
 		// Now m_dJdq 3 x dof x dof stores the Jacobian after perturbing each body a little bit
-		// dJdq_i computed 
-
-		yi = y0;
-		yi(idx) -= EPSILON;
-
-		for (int j = 0; j < m_n_bodies; j++) {
-			int index = m_bodies[j]->getJoint()->idxR;
-			forward(index, yi, world);
-			backward(index, yi, world);
-
-			for (int k = 0; k < m_n_nodes; ++k) {
-				//cout << "node : " << k << endl;
-				Vector3d diff = (m_nodes[k]->x_f - m_nodes[k]->x_b) / (2 * EPSILON);
-				//cout << "layer: idx " << idx << "col" << index << endl << diff << endl;
-				m_nodes[k]->m_dJdq_b[idx].col(index) = diff; // attention: the corresponding rigid body
-			}
-		}
-		recover(y0, world);
 	}
+
+	recover(y0, world);
 
 	//Compute dJdq and Jdot for each node
 	for (int t = 0; t < m_n_nodes; ++t) {
@@ -266,8 +235,7 @@ void MuscleSpring::computeJMJdotqdot_(Eigen::VectorXd & f, const Eigen::VectorXd
 	for (int j = 0; j < m_n_nodes; ++j) {
 		auto node = m_nodes[j];
 		VectorXd fvec = node->m * node->m_J.transpose() * Matrix3d::Identity() * node->m_Jdot * qdot0; // need to check the sign later
-		f -= fvec;
-		
+		f -= fvec;	
 #ifdef DEBUG
 		if (j == 1) {
 			cout << "f_" << j << endl << fvec << endl << endl;
@@ -276,5 +244,32 @@ void MuscleSpring::computeJMJdotqdot_(Eigen::VectorXd & f, const Eigen::VectorXd
 			cout << "qdot " << endl << qdot0 << endl << endl;
 		}
 #endif
+	}
+}
+
+void MuscleSpring::computedJdq(Eigen::VectorXd y0, std::shared_ptr<World> world, bool isForward, int idx) {
+	if (isForward) {
+		y0(idx) += EPSILON;
+	}
+	else {
+		y0(idx) -= EPSILON;
+	}
+
+	for (int j = 0; j < m_n_bodies; j++) {
+		int index = m_bodies[j]->getJoint()->idxR;
+		forward(index, y0, world);
+		backward(index, y0, world);
+
+		for (int k = 0; k < m_n_nodes; ++k) {
+			//cout << "node : " << k << endl;
+			Vector3d diff = (m_nodes[k]->x_f - m_nodes[k]->x_b) / (2 * EPSILON);
+			//cout << "layer: idx " << idx << "col" << index << endl << diff << endl;
+			if (isForward) {
+				m_nodes[k]->m_dJdq[idx].col(index) = diff; // attention: the corresponding rigid body
+			}
+			else {
+				m_nodes[k]->m_dJdq_b[idx].col(index) = diff; // attention: the corresponding rigid body
+			}
+		}
 	}
 }

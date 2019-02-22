@@ -36,6 +36,7 @@ protected:
 	void forward(int i, Eigen::VectorXd q0, std::shared_ptr<World> world);
 	void backward(int i, Eigen::VectorXd q0, std::shared_ptr<World> world);
 	void recover(Eigen::VectorXd q0, std::shared_ptr<World> world);
+	void computedJdq(Eigen::VectorXd y0, std::shared_ptr<World> world, bool isForward, int idx);
 	void computeJMJdotqdot_(Eigen::VectorXd & f, const Eigen::VectorXd &qdot, std::shared_ptr<World> world, std::shared_ptr<SolverSparse> solver);
 	void computeJ(Eigen::VectorXd q0, std::shared_ptr<World> world);
 	std::shared_ptr<Body> m_body0;
