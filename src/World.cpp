@@ -1181,11 +1181,7 @@ Energy World::computeEnergy() {
 	m_joints[0]->computeEnergies(m_grav, m_energy);
 	m_deformables[0]->computeEnergies(m_grav, m_energy);
 	m_springs[0]->computeEnergies(m_grav, m_energy);
-
-	cout << "energy_0" << endl << m_energy.V << endl;
 	m_muscles[0]->computeEnergies(m_grav, m_energy);
-	cout << "energy_1" << endl << m_energy.V << endl;
-
 	if (m_t == 0.0) {
 		m_energy0 = m_energy;
 	}

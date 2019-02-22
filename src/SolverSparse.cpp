@@ -75,7 +75,6 @@ void SolverSparse::initMatrix(int nm, int nr, int nem, int ner, int nim, int nir
 	//Km_sp.data().squeeze();
 	Km_.clear();
 
-
 	J_dense.setZero();
 	Jdot_dense.setZero();
 
@@ -167,6 +166,8 @@ void SolverSparse::initMatrix(int nm, int nr, int nem, int ner, int nim, int nir
 	JMJ_mi.setZero();
 	Jf_mi.setZero();
 	fvm.setZero();
+	m_fk.setZero();
+	m_fk_matlab.setZero();
 }
 
 VectorXd SolverSparse::dynamics(VectorXd y)
@@ -245,6 +246,8 @@ VectorXd SolverSparse::dynamics(VectorXd y)
 			JMJ_mi.resize(nr, nr);
 			Jf_mi.resize(nr);
 			fvm.resize(nr);
+			m_fk.resize(nr);
+			m_fk_matlab.resize(nr);
 			// JMJdot_mi.resize
 		}
 
@@ -286,7 +289,6 @@ VectorXd SolverSparse::dynamics(VectorXd y)
 			break;
 		}
 
-
 		body0->computeGrav(grav, fm);
 		body0->computeForceDampingSparse(tmp, Dm_);
 		deformable0->computeForce(grav, fm);
@@ -318,8 +320,6 @@ VectorXd SolverSparse::dynamics(VectorXd y)
 		}
 
 		Energy ener = m_world->computeEnergy();
-		
-
 		spring0->computeForceStiffnessDampingSparse(fm, Km_, Dm_);
 		//cout <<"JMJ_B:" << JMJ_mi << endl;
 		muscle0->computeJMJ(JMJ_mi, m_world);
@@ -359,14 +359,16 @@ VectorXd SolverSparse::dynamics(VectorXd y)
 #ifdef DEBUG_MATLAB
 		//cout << "f_0" << endl << f_0 << endl;
 		//cout << "f_1" << endl << Jf_mi << endl;
-		cout << "f_2" << endl << fvm << endl;
+		//cout << "f_2" << endl << fvm << endl;
 		//cout << "fr " << endl << fr_ << endl;
 #endif
+		m_fk = fvm;
 
 		double K = 0.5*qdot0.transpose()*MatrixXd(MDKr_sp)*qdot0;
 		//cout << "K" << endl << K << endl;
 		//cout << "V" << endl << ener.V << endl;
-		cout << "energy c++" << endl << K + ener.V << endl;
+		cout << "fk diff: " << endl << (m_fk - m_fk_matlab).norm() << endl;
+		cout << "energy diff" << endl << K + ener.V - energy_matlab << endl << endl;
 		//cout << MatrixXd(MDKr_sp) << endl << endl;
 		//cout << "fm" << fm << endl << endl;
 		//cout << "fr" << fr << endl << endl;
@@ -412,8 +414,7 @@ VectorXd SolverSparse::dynamics(VectorXd y)
 
 				MatrixXd m_Gm = MatrixXd(Gm_sp)(m_rowsEM, Eigen::placeholders::all);
 				//cout << m_Gm << endl << endl;
-				
-
+			
 				MatrixXd m_Gr = MatrixXd(Gr_sp)(m_rowsER, Eigen::placeholders::all);
 				VectorXd m_gm = gm(m_rowsEM);
 				//cout << m_gm << endl << endl;
@@ -502,7 +503,6 @@ VectorXd SolverSparse::dynamics(VectorXd y)
 			cg.compute(MDKr_sp);
 			if (cg.info() != Success) {
 				// solve() failed
-
 				cout << "solve failed" << endl << endl;
 				exit(1);
 			}
@@ -520,7 +520,6 @@ VectorXd SolverSparse::dynamics(VectorXd y)
 
 			/*
 			//Slow
-
 			MatrixXd LHS(rows, cols);		
 			LHS.setZero();
 			
@@ -531,8 +530,7 @@ VectorXd SolverSparse::dynamics(VectorXd y)
 			LHS.block(0, nr, nr, ne) = G.transpose();
 			LHS.block(nr, 0, ne, nr) = G;
 			SparseMatrix<double> LHS_sp(rows, cols);
-			LHS_sp = LHS.sparseView(1e-8);
-			
+			LHS_sp = LHS.sparseView(1e-8);		
 			*/
 			int nre = nr + ne;
 			lhs_left_tp.resize(nr, nre);
@@ -560,7 +558,6 @@ VectorXd SolverSparse::dynamics(VectorXd y)
 			zero.resize(ne, ne);
 			lhs_right_tp.rightCols(ne) = zero;
 
-
 			lhs_left = lhs_left_tp.transpose();  // rows x nr
 			lhs_right = lhs_right_tp.transpose(); // rows x ne
 
@@ -570,8 +567,6 @@ VectorXd SolverSparse::dynamics(VectorXd y)
 			rhs.resize(nre);
 			rhs.segment(0, nr) = fr_;
 			rhs.segment(nr, ne) = rhsG;
-
-
 			//cout << MatrixXd(LHS_sp) << endl << endl;
 			//cout << rhs << endl << endl;
 
@@ -834,10 +829,13 @@ Eigen::VectorXd SolverSparse::dynamics_matlab(Eigen::VectorXd y) {
 	Vector2d f_0 = M * L * L * fktest + M * L * (fv0 + fv1);
 	Vector2d f_1 = M * L * fvm;
 	Vector2d f_2 = f - f_1 - f_0;
+	m_fk_matlab(0) = f_2(1);
+	m_fk_matlab(1) = f_2(0);
+
 #ifdef DEBUG_MATLAB
 	//cout << "f_0 matlab:" << endl << f_0 << endl;
 	//cout << "f_1 matlab:" << endl << f_1 << endl;
-	cout << "f_2 matlab:" << endl << f_2 << endl;
+	//cout << "f_2 matlab:" << endl << f_2 << endl;
 	//cout << "f matlab:" << endl << f << endl;
 #endif
 	Vector2d qddot = I.ldlt().solve(f);
@@ -857,7 +855,8 @@ Eigen::VectorXd SolverSparse::dynamics_matlab(Eigen::VectorXd y) {
 
 	//cout << "K matlab " << endl << K << endl;
 	//cout << "V matlab " << endl << V << endl;
-	cout << "energy matlab " << endl << K + V << endl;
+	energy_matlab = K + V;
+	//cout << "energy matlab " << endl << K + V << endl;
 	return ydot;
 }
 

@@ -120,7 +120,7 @@ void Node::draw(shared_ptr<MatrixStack> MV, const shared_ptr<Program> prog) cons
 		MV->translate(static_cast<float>(x(0)), static_cast<float>(x(1)), static_cast<float>(x(2)));
 		MV->scale(static_cast<float>(r));
 		glUniformMatrix4fv(prog->getUniform("MV"), 1, GL_FALSE, glm::value_ptr(MV->topMatrix()));
-		sphere->draw(prog);
+		//sphere->draw(prog);
 		MV->popMatrix();
 	}
 }

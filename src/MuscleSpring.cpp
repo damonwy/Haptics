@@ -10,7 +10,7 @@
 using namespace std;
 using namespace Eigen;
 using json = nlohmann::json;
-#define EPSILON 1e-5
+#define EPSILON 1e-8
 //#define DEBUG
 
 MuscleSpring::MuscleSpring(std::vector<std::shared_ptr<Body>> bodies, int n_nodes):

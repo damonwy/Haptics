@@ -145,6 +145,7 @@ private:
 	Eigen::VectorXd fvm;
 
 	Eigen::MatrixXd JMJdot_mi;
-
-
+	Eigen::VectorXd m_fk;
+	Eigen::VectorXd m_fk_matlab;
+	double energy_matlab;
 };

@@ -89,23 +89,18 @@ int torend = 0;
 void Scene::step()
 {
 	VectorXd ys;
-
 	//runge_kutta_cash_karp54<Eigen::VectorXd> stepper;
 	//vector<Eigen::VectorXd> x_vec;
 	//vector<double> times;
 
 	//integrate_adaptive(stepper, , y, 0.0, h, h, Observer(x_vec, times));
-	//cout << x_vec[1] << endl;
-	cout << "y0" << y << endl;
+	//cout << x_vec[1] << endl;	
 	y = m_solver->dynamics(y);
 	
-	cout << "y1" << y << endl;
-
 	//m_world->getJoint0()->reparam();
 	//m_world->getJoint0()->gatherDofs(y, m_world->nr);
 	m_world->update();
 	m_world->incrementTime();
-
 	torend++;
 
 	count++;
