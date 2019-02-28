@@ -357,9 +357,10 @@ VectorXd SolverSparse::dynamics(VectorXd y)
 		
 		VectorXd f_0 = J_t_sp * (fm - Mm_sp * Jdot_sp * qdot0) + fr;
 #ifdef DEBUG_MATLAB
+		cout << "q0: " << endl << q0 << endl;
 		//cout << "f_0" << endl << f_0 << endl;
 		//cout << "f_1" << endl << Jf_mi << endl;
-		//cout << "f_2" << endl << fvm << endl;
+		cout << "f_2" << endl << fvm << endl;
 		//cout << "fr " << endl << fr_ << endl;
 #endif
 		m_fk = fvm;
@@ -835,7 +836,7 @@ Eigen::VectorXd SolverSparse::dynamics_matlab(Eigen::VectorXd y) {
 #ifdef DEBUG_MATLAB
 	//cout << "f_0 matlab:" << endl << f_0 << endl;
 	//cout << "f_1 matlab:" << endl << f_1 << endl;
-	//cout << "f_2 matlab:" << endl << f_2 << endl;
+	cout << "f_2 matlab:" << endl << f_2 << endl;
 	//cout << "f matlab:" << endl << f << endl;
 #endif
 	Vector2d qddot = I.ldlt().solve(f);

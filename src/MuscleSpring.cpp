@@ -11,7 +11,7 @@ using namespace std;
 using namespace Eigen;
 using json = nlohmann::json;
 #define EPSILON 1e-8
-//#define DEBUG
+#define DEBUG
 
 MuscleSpring::MuscleSpring(std::vector<std::shared_ptr<Body>> bodies, int n_nodes):
 	Muscle(bodies, n_nodes)
@@ -245,6 +245,61 @@ void MuscleSpring::computeJMJdotqdot_(Eigen::VectorXd & f, const Eigen::VectorXd
 		}
 #endif
 	}
+
+
+	Matrix2d testJ, testJdot;
+	vector<Matrix2d> testdJdq;
+	test(y0, testJ, testdJdq, testJdot);
+	cout << "test: " << endl;
+	cout << "J: " << endl << testJ << endl;
+	cout << "Jdot: " << endl << testJdot << endl;
+	cout << "dJdq 0: " << endl << testdJdq[0] << endl;
+	cout << "dJdq 1: " << endl << testdJdq[1] << endl;
+
+
+}
+
+void MuscleSpring::test(Eigen::VectorXd q0, Eigen::Matrix2d &J, std::vector<Eigen::Matrix2d> &dJdq, Eigen::Matrix2d &Jdot) {
+	double s = 0.5;
+	double l = 10.0;
+	double r = 5.0;
+	q0(1) += M_PI / 2.0;
+	double s0 = sin(q0(1));
+	double c0 = cos(q0(1));
+	double s01 = sin(q0(0) + q0(1));
+	double c01 = cos(q0(0) + q0(1));
+
+	// Unpack the data
+	Vector2d q, qdot;
+	qdot(0) = q0(3); 
+	qdot(1) = q0(2);
+	q(0) = q0(1); 
+	q(1) = q0(0);
+
+	J.resize(2, 2);
+	J << -l * s0 - r * s01, -r * s01, l*c0 + r * c01, r*c01;
+	J *= s;
+
+	Matrix2d M;
+	M = J.transpose() * J;
+
+	dJdq.clear();
+	Matrix2d Jdot_;
+	Jdot_ << -l * c0 - r * c01, -r * c01, -l * s0 - r * s01, -r * s01;
+	Jdot_ *= s;
+	dJdq.push_back(Jdot_);
+
+	Jdot_ << -r * c01, -r * c01, -r * s01, -r * s01; 
+	Jdot_ *= s;
+	dJdq.push_back(Jdot_);
+
+	Jdot.resize(2, 2);
+	Jdot.setZero();
+
+	for (int i = 0; i < 2; ++i) {
+		Jdot += dJdq[i] * qdot(i);
+	}
+
 }
 
 void MuscleSpring::computedJdq(Eigen::VectorXd y0, std::shared_ptr<World> world, bool isForward, int idx) {

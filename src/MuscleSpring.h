@@ -29,6 +29,7 @@ protected:
 	void computeForce_(Vector3d grav, Eigen::VectorXd &f);
 	void computeForceDamping_(Vector3d grav, Eigen::VectorXd &f, Eigen::MatrixXd &D);
 	void computeForceDampingSparse_(Vector3d grav, Eigen::VectorXd &f, std::vector<T> &D_);
+	void test(Eigen::VectorXd q0, Eigen::Matrix2d &J, std::vector<Eigen::Matrix2d> &dJdq, Eigen::Matrix2d &Jdot);
 
 	void computeEnergies_(Vector3d grav, Energy &ener);
 	void computeJMJ_(Eigen::MatrixXd &J, std::shared_ptr<World> world);
