@@ -168,6 +168,9 @@ void SolverSparse::initMatrix(int nm, int nr, int nem, int ner, int nim, int nir
 	fvm.setZero();
 	m_fk.setZero();
 	m_fk_matlab.setZero();
+	I_matlab.resize(nr, nr);
+	Im_matlab.resize(nr, nr);
+	Ir_matlab.resize(nr, nr);
 }
 
 VectorXd SolverSparse::dynamics(VectorXd y)
@@ -341,6 +344,7 @@ VectorXd SolverSparse::dynamics(VectorXd y)
 		J_t_sp = J_sp.transpose();
 
 		Mr_sp = J_t_sp * (Mm_sp - hsquare * K_sp) * J_sp + JMJ_mi;
+		MatrixXd Ir = MatrixXd(J_t_sp * (Mm_sp - hsquare * K_sp) * J_sp);
 		// 
 		//cout << "I " << endl << MatrixXd(Mr_sp) << endl;
 		//cout << "JMJ_mi "<< JMJ_mi + MatrixXd(Mr_sp) << endl << endl;
@@ -355,22 +359,21 @@ VectorXd SolverSparse::dynamics(VectorXd y)
 
 		fr_ = /*Mr_sp * qdot0 + h* */ (J_t_sp * (fm - Mm_sp * Jdot_sp * qdot0) + fr + Jf_mi + fvm); 
 		
-		VectorXd f_0 = J_t_sp * (fm - Mm_sp * Jdot_sp * qdot0) + fr;
+		VectorXd f_0 = J_t_sp * (fm - Mm_sp * Jdot_sp * qdot0) + fr;		
+		m_fk = fvm;
+		double K = 0.5*qdot0.transpose()*MatrixXd(MDKr_sp)*qdot0;
+
 #ifdef DEBUG_MATLAB
 		cout << "q0: " << endl << q0 << endl;
 		//cout << "f_0" << endl << f_0 << endl;
 		//cout << "f_1" << endl << Jf_mi << endl;
 		cout << "f_2" << endl << fvm << endl;
 		//cout << "fr " << endl << fr_ << endl;
-#endif
-		m_fk = fvm;
+		cout << "K" << endl << K << endl;
+		cout << "V" << endl << ener.V << endl;
 
-		double K = 0.5*qdot0.transpose()*MatrixXd(MDKr_sp)*qdot0;
-		//cout << "K" << endl << K << endl;
-		//cout << "V" << endl << ener.V << endl;
-		cout << "fk diff: " << endl << (m_fk - m_fk_matlab).norm() << endl;
-		cout << "energy diff" << endl << K + ener.V - energy_matlab << endl << endl;
-		//cout << MatrixXd(MDKr_sp) << endl << endl;
+#endif
+
 		//cout << "fm" << fm << endl << endl;
 		//cout << "fr" << fr << endl << endl;
 		//cout << "Jdot_sp" << MatrixXd(Jdot_sp) << endl << endl;
@@ -511,9 +514,6 @@ VectorXd SolverSparse::dynamics(VectorXd y)
 			//qdot1 = cg.solveWithGuess(fr_, qdot0);
 			qddot = cg.solve(fr_);
 
-			/*cout << MatrixXd(MDKr_sp) << endl << endl;
-			cout << fr_ << endl << endl;
-			cout << qdot1 << endl;*/
 		}
 		else if (ne > 0 && ni == 0) {  // Just equality
 			//int rows = nr + ne;
@@ -717,6 +717,15 @@ VectorXd SolverSparse::dynamics(VectorXd y)
 		VectorXd qdot1_matlab = qddot_matlab * h + qdot0;
 		VectorXd q1_matlab = q0 + h * qdot1_matlab;
 		
+		cout << "fk diff: " << endl << (m_fk - m_fk_matlab).norm() << endl;
+		cout << "energy diff" << endl << K + ener.V - energy_matlab << endl << endl;
+		cout << MatrixXd(MDKr_sp) << endl;
+		cout << I_matlab << endl;
+		cout << "I diff " << (MatrixXd(MDKr_sp)-I_matlab).norm() << endl;
+		cout << "Im diff " << endl << (JMJ_mi - Im_matlab).norm() << endl;
+		cout << "Ir diff " << endl << (Ir - Ir_matlab).norm() << endl;
+
+
 		//qddot = (qdot1 - qdot0) / h;
 		qdot1 = qddot * h + qdot0;
 		q1 = q0 + h * qdot1;
@@ -798,6 +807,26 @@ Eigen::VectorXd SolverSparse::dynamics_matlab(Eigen::VectorXd y) {
 	Im << l * l + r * r + 2 * l*r*c1, r*r + l * r*c1, r*r + l * r*c1, r*r;
 	Im *= mum / 3.0;
 	I = M * L * L * (I0 + I1 + Im);
+
+
+	I_matlab(0, 0) = I(1, 1);
+	I_matlab(1, 1) = I(0, 0);
+	I_matlab(0, 1) = I(1, 0);
+	I_matlab(1, 0) = I(0, 1);
+
+	Im_matlab(0, 0) = Im(1, 1);;
+	Im_matlab(1, 1) = Im(0, 0);;
+	Im_matlab(0, 1) = Im(1, 0);;
+	Im_matlab(1, 0) = Im(0, 1);;
+	Im_matlab *= M * L*L;
+
+	Matrix2d I01 = (I1 + I0) * M * L * L;
+	Ir_matlab(0, 0) = I01(1, 1);
+	Ir_matlab(1, 1) = I01(0, 0);
+	Ir_matlab(0, 1) = I01(1, 0);
+	Ir_matlab(1, 0) = I01(0, 1);
+
+
 	//cout << "I matlab:" << endl << I << endl;
 
 	Matrix2d temp0, temp1;
@@ -854,8 +883,8 @@ Eigen::VectorXd SolverSparse::dynamics_matlab(Eigen::VectorXd y) {
 	double vm = -0.5*mum*g*(l*c0 + r * c01);
 	double V = M * L * (v1 + v2 + vm);
 
-	//cout << "K matlab " << endl << K << endl;
-	//cout << "V matlab " << endl << V << endl;
+	cout << "K matlab " << endl << K << endl;
+	cout << "V matlab " << endl << V << endl;
 	energy_matlab = K + V;
 	//cout << "energy matlab " << endl << K + V << endl;
 	return ydot;

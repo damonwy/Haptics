@@ -11,7 +11,7 @@ using namespace std;
 using namespace Eigen;
 using json = nlohmann::json;
 #define EPSILON 1e-8
-#define DEBUG
+//#define DEBUG
 
 MuscleSpring::MuscleSpring(std::vector<std::shared_ptr<Body>> bodies, int n_nodes):
 	Muscle(bodies, n_nodes)
@@ -202,7 +202,6 @@ void MuscleSpring::computeJMJdotqdot_(Eigen::VectorXd & f, const Eigen::VectorXd
 	VectorXd qdot0 = solver->qdot0;
 	VectorXd y0(2*world->nr), yi, yj;
 	y0 << q0, qdot0;
-	//cout << "input states:" << endl << y0 << endl;
 
 	// Compute Jdot = dJdq * qdot
 	for (int i = 0; i < m_n_bodies; ++i) {
@@ -221,11 +220,17 @@ void MuscleSpring::computeJMJdotqdot_(Eigen::VectorXd & f, const Eigen::VectorXd
 		node->m_Jdot.setZero();
 
 		for (int s = 0; s < m_n_bodies; ++s) { // each slice of dJdq
-			node->m_dJdq[s] = (node->m_dJdq[s] - node->m_dJdq_b[s])/(2 * EPSILON);
+			if (t == 1) {
+				//cout << "node " << t << "slice " << s << endl << m_nodes[t]->m_dJdq[s] << endl << endl;
+				//cout << "node " << t << "slice " << s << endl << m_nodes[t]->m_dJdq_b[s] << endl << endl;
+			}
+
+			node->m_dJdq[s] = (node->m_dJdq[s] - node->m_dJdq_b[s])/(2 *EPSILON);
+
 #ifdef DEBUG			
 			if (t == 1) {
-			cout << "node " << t << "slice " << s << endl << m_nodes[t]->m_dJdq[s] << endl << endl;
-			cout << "qdot0 "  << endl << qdot0(s) << endl << endl;
+				cout << "node " << t << "slice " << s << endl << m_nodes[t]->m_dJdq[s] << endl << endl;
+		
 			}
 #endif
 			node->m_Jdot += node->m_dJdq[s] * qdot0(s);
@@ -245,8 +250,8 @@ void MuscleSpring::computeJMJdotqdot_(Eigen::VectorXd & f, const Eigen::VectorXd
 		}
 #endif
 	}
-
-
+	
+#ifdef DEBUG
 	Matrix2d testJ, testJdot;
 	vector<Matrix2d> testdJdq;
 	test(y0, testJ, testdJdq, testJdot);
@@ -255,15 +260,21 @@ void MuscleSpring::computeJMJdotqdot_(Eigen::VectorXd & f, const Eigen::VectorXd
 	cout << "Jdot: " << endl << testJdot << endl;
 	cout << "dJdq 0: " << endl << testdJdq[0] << endl;
 	cout << "dJdq 1: " << endl << testdJdq[1] << endl;
-
+#endif
 
 }
 
 void MuscleSpring::test(Eigen::VectorXd q0, Eigen::Matrix2d &J, std::vector<Eigen::Matrix2d> &dJdq, Eigen::Matrix2d &Jdot) {
-	double s = 0.5;
+	// Use this to test the J, Jdot, dJdq of a material point in a spring 
+	// Compare this with the fd results
+	// Use Epsilon = 1e-5
+
+	double s = 0.5; // point position in a spring
 	double l = 10.0;
 	double r = 5.0;
 	q0(1) += M_PI / 2.0;
+
+	// 
 	double s0 = sin(q0(1));
 	double c0 = cos(q0(1));
 	double s01 = sin(q0(0) + q0(1));
@@ -316,7 +327,6 @@ void MuscleSpring::computedJdq(Eigen::VectorXd y0, std::shared_ptr<World> world,
 		backward(index, y0, world);
 
 		for (int k = 0; k < m_n_nodes; ++k) {
-			//cout << "node : " << k << endl;
 			Vector3d diff = (m_nodes[k]->x_f - m_nodes[k]->x_b) / (2 * EPSILON);
 			//cout << "layer: idx " << idx << "col" << index << endl << diff << endl;
 			if (isForward) {

@@ -28,6 +28,10 @@ private:
 	std::vector<T> Mm_;
 
 	Eigen::SparseMatrix<double> MDKr_sp;
+	Eigen::MatrixXd I_matlab;
+	Eigen::MatrixXd Im_matlab;
+	Eigen::MatrixXd Ir_matlab;
+
 	Eigen::SparseMatrix<double> MDKr_sp_tp;
 
 	Eigen::SparseMatrix<double> K_sp;
