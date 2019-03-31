@@ -89,6 +89,8 @@ public:
 	virtual Eigen::VectorXd dynamics(Eigen::VectorXd y) { Eigen::Vector3d z; z.setZero(); return z; }
 	virtual void initMatrix(int nm, int nr, int nem, int ner, int nim, int nir) {}
 	virtual void reset();
+	Energy m_energy;
+	Energy m_energy_matlab;
 
 protected:
 	std::shared_ptr<Solution> m_solutions;

@@ -11,7 +11,7 @@ public:
 	Eigen::VectorXd dynamics_matlab(Eigen::VectorXd y);
 	void test(const Eigen::VectorXd &x, Eigen::VectorXd &dxdt, const double);
 	void initMatrix(int nm, int nr, int nem, int ner, int nim, int nir);
-Eigen::MatrixXd J_dense;	// dense_nm x dense_nr
+	Eigen::MatrixXd J_dense;	// dense_nm x dense_nr
 	Eigen::MatrixXd Jdot_dense;
 	Eigen::MatrixXd JMJ_mi;
 
@@ -22,6 +22,9 @@ Eigen::MatrixXd J_dense;	// dense_nm x dense_nr
 	Eigen::VectorXd qdot0;
 	Eigen::VectorXd qdot1;
 	Eigen::VectorXd qddot;
+
+
+
 private:
 	bool isCollided;
 	SparseSolver m_sparse_solver;
@@ -151,5 +154,6 @@ private:
 	Eigen::MatrixXd JMJdot_mi;
 	Eigen::VectorXd m_fk;
 	Eigen::VectorXd m_fk_matlab;
-	double energy_matlab;
+
+
 };

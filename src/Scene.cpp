@@ -97,6 +97,8 @@ void Scene::step()
 	//cout << x_vec[1] << endl;	
 	y = m_solver->dynamics(y);
 	
+
+
 	//m_world->getJoint0()->reparam();
 	//m_world->getJoint0()->gatherDofs(y, m_world->nr);
 	m_world->update();
@@ -108,6 +110,7 @@ void Scene::step()
 		cout << count << endl;
 	}
 	
+	saveEnergyData(100);
 	//if(tk < m_solution->t(n_steps-1)) {
 	//	m_solution->searchTime(tk, search_idx, output_idx, s);
 	//	search_idx = output_idx;
@@ -124,6 +127,37 @@ void Scene::step()
 	//}	
 
 }
+
+void Scene::saveEnergyData(int num_steps) {
+	// Save data in matlab
+	if (count % 1 == 0) {
+		m_energy_vector.push_back(m_solver->m_energy);
+		m_time_vector.push_back(m_world->getTime());
+	}
+
+	if (count == num_steps) {
+		cout << "finished!" << endl;
+		VectorXd Kv;
+		VectorXd Vv;
+		VectorXd Tv;
+
+		Kv.resize(m_energy_vector.size());
+		Vv.resize(m_energy_vector.size());
+		Tv.resize(m_energy_vector.size());
+
+		for (int i = 0; i < m_energy_vector.size(); i++) {
+			Kv(i) = m_energy_vector[i].K;
+			Vv(i) = m_energy_vector[i].V;
+			Tv(i) = m_time_vector[i];
+		}
+		
+		vec_to_file(Kv, "Kcpp");
+		vec_to_file(Vv, "Vcpp");
+		vec_to_file(Tv, "Tcpp");
+
+	}
+}
+
 
 void Scene::draw(shared_ptr<MatrixStack> MV, const shared_ptr<Program> prog, const shared_ptr<Program> progSimple, const shared_ptr<Program> progSoft, shared_ptr<MatrixStack> P) const
 {

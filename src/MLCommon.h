@@ -73,6 +73,25 @@ enum Axis {X_AXIS, Y_AXIS, Z_AXIS};
 struct Energy {
 	double K;
 	double V;
+
+	Energy() {
+		K = 0.0;
+		V = 0.0;
+	}
+
+	Energy(double K_, double V_) {
+		K = K_;
+		V = V_;
+	}
+
+	void set(double K_, double V_) {
+		K = K_;
+		V = V_;
+	}
+
+	double sum() {
+		return(K + V);
+	}
 };
 enum SparseSolver {CG, CG_ILUT, QR, BICG,BICG_ILUT, SLDLT, LU, PARDISO_LU, PARDISO_LDLT, MINRES_SOLVER, GMRES_SOLVER, SUPER_LU
 };

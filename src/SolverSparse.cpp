@@ -361,7 +361,8 @@ VectorXd SolverSparse::dynamics(VectorXd y)
 		
 		VectorXd f_0 = J_t_sp * (fm - Mm_sp * Jdot_sp * qdot0) + fr;		
 		m_fk = fvm;
-		double K = 0.5*qdot0.transpose()*MatrixXd(MDKr_sp)*qdot0;
+		double K = 0.5 * qdot0.transpose()* MatrixXd(MDKr_sp) * qdot0;
+		m_energy.set(K, ener.V);
 
 #ifdef DEBUG_MATLAB
 		cout << "q0: " << endl << q0 << endl;
@@ -718,9 +719,10 @@ VectorXd SolverSparse::dynamics(VectorXd y)
 		VectorXd q1_matlab = q0 + h * qdot1_matlab;
 		
 		cout << "fk diff: " << endl << (m_fk - m_fk_matlab).norm() << endl;
-		cout << "energy diff" << endl << K + ener.V - energy_matlab << endl << endl;
-		cout << MatrixXd(MDKr_sp) << endl;
-		cout << I_matlab << endl;
+		cout << "energy diff" << endl << m_energy.sum() - m_energy_matlab.sum() << endl << endl;
+		
+		//cout << MatrixXd(MDKr_sp) << endl;
+		//cout << I_matlab << endl;
 		cout << "I diff " << (MatrixXd(MDKr_sp)-I_matlab).norm() << endl;
 		cout << "Im diff " << endl << (JMJ_mi - Im_matlab).norm() << endl;
 		cout << "Ir diff " << endl << (Ir - Ir_matlab).norm() << endl;
@@ -729,9 +731,10 @@ VectorXd SolverSparse::dynamics(VectorXd y)
 		//qddot = (qdot1 - qdot0) / h;
 		qdot1 = qddot * h + qdot0;
 		q1 = q0 + h * qdot1;
+
+		// Use Cpp result for next step
 		yk.segment(0, nr) = q1;
 		yk.segment(nr, nr) = qdot1;
-
 		ydotk.segment(0, nr) = qdot1;
 		ydotk.segment(nr, nr) = qddot;
 
@@ -743,10 +746,11 @@ VectorXd SolverSparse::dynamics(VectorXd y)
 		q1_matlab = q0 + h * qdot0;
 		//qdot1_matlab = qdot0;
 
-		yk.segment(0, nr) = q1_matlab;
+		// Use Matlab result for next step
+		/*yk.segment(0, nr) = q1_matlab;
 		yk.segment(nr, nr) = qdot1_matlab;
 		ydotk.segment(0, nr) = qdot0;
-		ydotk.segment(nr, nr) = qddot_matlab;
+		ydotk.segment(nr, nr) = qddot_matlab;*/
 
 		//cout << "yk" << endl << yk << endl;
 		//cout << "ydotk" << endl << ydotk << endl;
@@ -882,18 +886,14 @@ Eigen::VectorXd SolverSparse::dynamics_matlab(Eigen::VectorXd y) {
 	double v2 = -mu1 * g*(l*c0 + 0.5*c01);
 	double vm = -0.5*mum*g*(l*c0 + r * c01);
 	double V = M * L * (v1 + v2 + vm);
-
+	m_energy_matlab.set(K, V);
 	cout << "K matlab " << endl << K << endl;
 	cout << "V matlab " << endl << V << endl;
-	energy_matlab = K + V;
-	//cout << "energy matlab " << endl << K + V << endl;
+	
 	return ydot;
 }
-
 
 void SolverSparse::test(const Eigen::VectorXd &x, Eigen::VectorXd &dxdt, const double) {
 	//dynamics(x);
 	//dxdt = ydotk;
 }
-
-

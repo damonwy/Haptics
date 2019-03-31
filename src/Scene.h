@@ -37,7 +37,13 @@ public:
 	void solve();
 	void draw(std::shared_ptr<MatrixStack> MV, const std::shared_ptr<Program> prog, const std::shared_ptr<Program> prog2, const std::shared_ptr<Program> prog3, std::shared_ptr<MatrixStack> P) const;
 	double getTime() const { return t; }
+	void saveEnergyData(int num_steps);
+
 	Eigen::VectorXd y;
+	std::vector<Energy> m_energy_vector;
+	std::vector<double> m_time_vector;
+
+
 private:
 	int count;
 	double t;

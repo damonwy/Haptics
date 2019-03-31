@@ -631,7 +631,7 @@ void World::load(const std::string &RESOURCE_DIR) {
 		m_h = 1.0e-2;
 		m_tspan << 0.0, 50.0;
 		m_t = 0.0;
-		density = 1.0;
+		density = 10000.0;
 		m_grav << 0.0, -9.81, 0.0;
 		Eigen::from_json(js["sides"], sides);
 
@@ -660,7 +660,7 @@ void World::load(const std::string &RESOURCE_DIR) {
 		related_bodies.push_back(m_bodies[0]);
 		related_bodies.push_back(m_bodies[1]);
 
-		auto muscle = make_shared<MuscleSpring>(related_bodies, 1000);
+		auto muscle = make_shared<MuscleSpring>(related_bodies, 10000);
 		muscle->setMass(10.0);
 		m_muscles.push_back(muscle);
 		m_nmuscles++;
