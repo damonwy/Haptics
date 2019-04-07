@@ -13,6 +13,7 @@ SET(DEF_DIR_JSONHPP_INCLUDE "D:\\Libraries\\json-develop\\include")
 SET(DEF_DIR_MOSEK "D:\\Libraries\\mosek_8.1_x64\\8\\tools\\platform\\win64x86")
 #SET(DEF_DIR_ODEINT "D:\\Libraries\\odeint-v2-2.6_boost1.60\\include")
 SET(DEF_DIR_BOOST "D:\\Libraries\\boost_1_65_1")
+SET(DEF_DIR_LIBTORCH "D:\\Libraries\\libtorch-win-shared-with-deps-latest\\libtorch")
 #SET(DEF_DIR_LIBIGL_INCLUDE "D:\\Libraries\\libigl-master\\libigl\\include")
 #SET(DEF_DIR_PARDISO "D:\\Libraries\\PARDISO")
 #SET(DEF_DIR_MKL "C:\\Program Files (x86)\\IntelSWTools\\compilers_and_libraries_2018\\windows\\mkl")
@@ -230,6 +231,20 @@ ELSE()
   ENDIF()
 ENDIF()
 
+
+
+SET(Torch_DIR ${DEF_DIR_LIBTORCH}/share/cmake/Torch)
+
+set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Build type (default Debug)")
+find_package(Torch REQUIRED)
+if(NOT Torch_FOUND)
+    message(FATAL_ERROR "Pytorch Not Found!")
+endif(NOT Torch_FOUND)
+message(STATUS "Pytorch status:")
+message(STATUS "    libraries: ${TORCH_LIBRARIES}")
+TARGET_LINK_LIBRARIES(${CMAKE_PROJECT_NAME} ${TORCH_LIBRARIES})
+set_property(TARGET ${CMAKE_PROJECT_NAME} PROPERTY CXX_STANDARD 11)
+
 # # Get the odeint environment variable. Since odeint is a header-only library, we
 # # just need to add it to the include directory.
 # SET(ODEINT_INCLUDE_DIR "$ENV{ODEINT_INCLUDE_DIR}")
@@ -271,6 +286,9 @@ IF(NOT BOOST_INCLUDE_DIR)
   ENDIF()
 ENDIF()
 INCLUDE_DIRECTORIES(${BOOST_INCLUDE_DIR})
+
+
+
 
 # OS specific options and libraries
 IF(WIN32)

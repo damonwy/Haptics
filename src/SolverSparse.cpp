@@ -19,6 +19,8 @@
 #include "ConstraintLoop.h"
 #include "ConstraintAttachSpring.h"
 #include "QuadProgMosek.h"
+#include <torch/script.h> // One-stop header.
+
 
 using namespace std;
 using namespace Eigen;
@@ -177,6 +179,12 @@ VectorXd SolverSparse::dynamics(VectorXd y)
 {
 	//SparseMatrix<double, RowMajor> G_sp;
 		if (step == 0) {
+			//std::shared_ptr<torch::jit::script::Module> module = torch::jit::load("model.pt");
+
+			//assert(module != nullptr);
+			//std::cout << "ok\n";
+
+
 			// constant during simulation
 			isCollided = false;
 			nr = m_world->nr;
