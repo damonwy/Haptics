@@ -93,6 +93,9 @@ struct Energy {
 		return(K + V);
 	}
 };
+
+
+
 enum SparseSolver {CG, CG_ILUT, QR, BICG,BICG_ILUT, SLDLT, LU, PARDISO_LU, PARDISO_LDLT, MINRES_SOLVER, GMRES_SOLVER, SUPER_LU
 };
 

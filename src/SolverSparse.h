@@ -23,8 +23,7 @@ public:
 	Eigen::VectorXd qdot0;
 	Eigen::VectorXd qdot1;
 	Eigen::VectorXd qddot;
-
-
+	void exportTrainingData();
 
 private:
 	bool isCollided;
@@ -151,10 +150,11 @@ private:
 	// Muscle Inertia Matrix
 	Eigen::VectorXd Jf_mi;
 	Eigen::VectorXd fvm;
-
 	Eigen::MatrixXd JMJdot_mi;
+
 	Eigen::VectorXd m_fk;
 	Eigen::VectorXd m_fk_matlab;
+
 
 
 };

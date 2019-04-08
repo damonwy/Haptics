@@ -27,7 +27,7 @@ using namespace std;
 using namespace Eigen;
 
 //#define CHECK_ENERGY
-#define DEBUG_MATLAB
+//#define DEBUG_MATLAB
 void SolverSparse::initMatrix(int nm, int nr, int nem, int ner, int nim, int nir) {
 	ni = nim + nir;
 	int nre = nr + ne;
@@ -180,13 +180,13 @@ VectorXd SolverSparse::dynamics(VectorXd y)
 {
 	//SparseMatrix<double, RowMajor> G_sp;
 		if (step == 0) {
-			std::shared_ptr<torch::jit::script::Module> module = torch::jit::load("./trained.pt");
-			module->to(at::kCUDA);
+			//std::shared_ptr<torch::jit::script::Module> module = torch::jit::load("./trained.pt");
+			//module->to(at::kCUDA);
 
-			assert(module != nullptr);
-			std::cout << "ok\n";
-			torch::Tensor tensor = torch::rand({ 2, 3 });
-			std::cout << tensor << std::endl;
+			//assert(module != nullptr);
+			//std::cout << "ok\n";
+			//torch::Tensor tensor = torch::rand({ 2, 3 });
+			//std::cout << tensor << std::endl;
 
 			// constant during simulation
 			isCollided = false;
@@ -345,7 +345,6 @@ VectorXd SolverSparse::dynamics(VectorXd y)
 		Dm_sp.setFromTriplets(Dm_.begin(), Dm_.end());
 		Dr_sp.setFromTriplets(Dr_.begin(), Dr_.end());
 		K_sp.setFromTriplets(K_.begin(), K_.end()); // check
-		//cout << "K" << K_.size() << endl;
 
 		Kr_sp.setFromTriplets(Kr_.begin(), Kr_.end());
 		J_sp.setFromTriplets(J_.begin(), J_.end()); // check
@@ -354,21 +353,20 @@ VectorXd SolverSparse::dynamics(VectorXd y)
 
 		J_t_sp = J_sp.transpose();
 
+		// Need prediction
 		Mr_sp = J_t_sp * (Mm_sp - hsquare * K_sp) * J_sp + JMJ_mi;
+
+
 		MatrixXd Ir = MatrixXd(J_t_sp * (Mm_sp - hsquare * K_sp) * J_sp);
-		// 
-		//cout << "I " << endl << MatrixXd(Mr_sp) << endl;
-		//cout << "JMJ_mi "<< JMJ_mi + MatrixXd(Mr_sp) << endl << endl;
-		//Mr_sp_temp = Mr_sp.transpose();
-		//Mr_sp += Mr_sp_temp;
-		//Mr_sp *= 0.5;	
 
 		MDKr_sp = Mr_sp + J_t_sp * (h * Dm_sp - hsquare * Km_sp) * J_sp + h * Dr_sp - hsquare * Kr_sp;
 
 		//Mr_sp = J_t_sp * (Mm_sp - hsquare * K_sp) * J_sp;
 		muscle0->computeJMJdotqdot(fvm, qdot0, m_world, shared_from_this());
 
+		// Need prediction
 		fr_ = /*Mr_sp * qdot0 + h* */ (J_t_sp * (fm - Mm_sp * Jdot_sp * qdot0) + fr + Jf_mi + fvm); 
+		exportTrainingData();
 		
 		VectorXd f_0 = J_t_sp * (fm - Mm_sp * Jdot_sp * qdot0) + fr;		
 		m_fk = fvm;
@@ -728,7 +726,9 @@ VectorXd SolverSparse::dynamics(VectorXd y)
 		VectorXd qddot_matlab = ydot_matlab.segment(nr, nr);
 		VectorXd qdot1_matlab = qddot_matlab * h + qdot0;
 		VectorXd q1_matlab = q0 + h * qdot1_matlab;
-		
+
+#ifdef DEBUG_MATLAB
+
 		cout << "fk diff: " << endl << (m_fk - m_fk_matlab).norm() << endl;
 		cout << "energy diff" << endl << m_energy.sum() - m_energy_matlab.sum() << endl << endl;
 		
@@ -737,7 +737,7 @@ VectorXd SolverSparse::dynamics(VectorXd y)
 		cout << "I diff " << (MatrixXd(MDKr_sp)-I_matlab).norm() << endl;
 		cout << "Im diff " << endl << (JMJ_mi - Im_matlab).norm() << endl;
 		cout << "Ir diff " << endl << (Ir - Ir_matlab).norm() << endl;
-
+#endif
 
 		//qddot = (qdot1 - qdot0) / h;
 		qdot1 = qddot * h + qdot0;
@@ -748,10 +748,6 @@ VectorXd SolverSparse::dynamics(VectorXd y)
 		yk.segment(nr, nr) = qdot1;
 		ydotk.segment(0, nr) = qdot1;
 		ydotk.segment(nr, nr) = qddot;
-
-		//cout <<"qddot "<< endl << qddot << endl;
-		//cout << "qddot_matlab"<<endl << qddot_matlab << endl;
-		//cout << "diff qddot" << (qddot - qddot_matlab).norm() << endl;
 		
 		// Use the result of matlab for comparison
 		q1_matlab = q0 + h * qdot0;
@@ -762,9 +758,6 @@ VectorXd SolverSparse::dynamics(VectorXd y)
 		yk.segment(nr, nr) = qdot1_matlab;
 		ydotk.segment(0, nr) = qdot0;
 		ydotk.segment(nr, nr) = qddot_matlab;*/
-
-		//cout << "yk" << endl << yk << endl;
-		//cout << "ydotk" << endl << ydotk << endl;
 
 		joint0->scatterDofs(yk, nr);
 		joint0->scatterDDofs(ydotk, nr);
@@ -907,4 +900,10 @@ Eigen::VectorXd SolverSparse::dynamics_matlab(Eigen::VectorXd y) {
 void SolverSparse::test(const Eigen::VectorXd &x, Eigen::VectorXd &dxdt, const double) {
 	//dynamics(x);
 	//dxdt = ydotk;
+}
+
+void SolverSparse::exportTrainingData() {
+	VectorXd JMJvec(Map<VectorXd>(JMJ_mi.data(), JMJ_mi.cols()*JMJ_mi.rows()));
+
+	m_training_data.set(q0, qdot0, JMJvec, Jf_mi, m_fk);
 }

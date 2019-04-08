@@ -13,7 +13,7 @@
 #include "DeformableSpring.h"
 //#include <boost/numeric/odeint.hpp>
 #include "EigenOdeintHelper.h"
-
+#include <time.h>
 
 using namespace std;
 using namespace Eigen;
@@ -21,6 +21,9 @@ using json = nlohmann::json;
 //using namespace boost::numeric::odeint;
 
 #include <unsupported/Eigen/MatrixFunctions> // TODO: avoid using this later, write a func instead
+
+//#define SIMULATION
+#define DENSE_SAMPLING
 
 Scene::Scene() :
 	t(0.0),
@@ -56,6 +59,7 @@ void Scene::load(const string &RESOURCE_DIR)
 
 void Scene::init()
 {
+	srand((unsigned)time(NULL));
 	count = 0;
 	m_world->init();
 	VectorXd y0, y1;
@@ -89,6 +93,7 @@ void Scene::solve() {
 int torend = 0;
 void Scene::step()
 {
+#ifdef SIMULATION
 	VectorXd ys;
 	//runge_kutta_cash_karp54<Eigen::VectorXd> stepper;
 	//vector<Eigen::VectorXd> x_vec;
@@ -127,7 +132,49 @@ void Scene::step()
 	//	tk = m_solution->t(0);
 	//}	
 
+#endif // SIMULATION
+
+#ifdef DENSE_SAMPLING
+	
+	y = m_solver->dynamics(y);
+	m_world->update();
+	m_world->incrementTime();
+	torend++;
+	count++;
+	if (count == 900) {
+		cout << count << endl;
+	}
+
+	saveTrainingData(900, 10);
+#endif // DENSE_SAMPLING
+
 }
+
+void Scene::saveTrainingData(int num_steps, int gap) {
+	// Save data in matlab
+	if (count % gap == 0) {
+		m_training_data_vector.push_back(m_solver->m_training_data);
+	}
+
+	if (count == num_steps) {
+		cout << "finished!" << endl;
+		MatrixXd e_JMJ;
+		MatrixXd e_q;
+		e_JMJ.resize(m_training_data_vector.size(), m_world->nr * m_world->nr);
+		e_q.resize(m_training_data_vector.size(), m_world->nr);
+
+		for (int i = 0; i < m_training_data_vector.size(); i++) {
+			m_training_data_vector[i].print();
+			e_JMJ.row(i) = m_training_data_vector[i].JMJ;
+			e_q.row(i) = m_training_data_vector[i].q0;
+		}
+
+		mat_to_file(e_JMJ, "JMJ");	
+		mat_to_file(e_q, "q");
+
+	}
+}
+
 
 void Scene::saveEnergyData(int num_steps) {
 	// Save data in matlab

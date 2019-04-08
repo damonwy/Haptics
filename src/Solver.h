@@ -70,6 +70,57 @@ struct Solution {
 
 };
 
+struct TrainingData {
+	Eigen::VectorXd q0;
+	Eigen::VectorXd qdot0;
+	Eigen::VectorXd JMJ;
+	Eigen::VectorXd Jf;
+	Eigen::VectorXd fk;
+
+	TrainingData() {
+
+	}
+
+	TrainingData(Eigen::VectorXd _q0, Eigen::VectorXd _qdot0, Eigen::VectorXd _JMJ, Eigen::VectorXd _Jf, Eigen::VectorXd _fk) {
+		q0 = _q0;
+		qdot0 = _qdot0;
+		JMJ = _JMJ;
+		Jf = _Jf;
+		fk = _fk;
+	}
+
+	void set(Eigen::VectorXd _q0, Eigen::VectorXd _qdot0, Eigen::VectorXd _JMJ, Eigen::VectorXd _Jf, Eigen::VectorXd _fk) {
+		q0 = _q0;
+		qdot0 = _qdot0;
+		JMJ = _JMJ;
+		Jf = _Jf;
+		fk = _fk;
+	}
+
+	void setDof(int dof) {
+		q0.resize(dof);
+		qdot0.resize(dof);
+		Jf.resize(dof);
+		fk.resize(dof);
+		JMJ.resize(dof * dof);
+		//JMJ.resize(dof, dof);
+
+		q0.setZero();
+		qdot0.setZero();
+		Jf.setZero();
+		fk.setZero();
+		JMJ.setZero();
+
+	}
+
+	void print() {
+		std::cout << "q0" << std::endl << q0 << std::endl;
+		std::cout << "JMJ" << std::endl << JMJ << std::endl;
+
+	}
+};
+
+
 class Solver 
 {
 public:
@@ -78,6 +129,7 @@ public:
 	std::shared_ptr<Joint> getJoint0() { return joint0; }
 	std::shared_ptr<Body> getBody0() { return body0; }
 	std::shared_ptr<Muscle> getMuscle0() { return muscle0; }
+	virtual void exportTrainingData() {}
 
 
 	virtual void test(const Eigen::VectorXd &x, Eigen::VectorXd &dxdt, const double) {}
@@ -89,6 +141,8 @@ public:
 	virtual Eigen::VectorXd dynamics(Eigen::VectorXd y) { Eigen::Vector3d z; z.setZero(); return z; }
 	virtual void initMatrix(int nm, int nr, int nem, int ner, int nim, int nir) {}
 	virtual void reset();
+
+	TrainingData m_training_data;
 	Energy m_energy;
 	Energy m_energy_matlab;
 

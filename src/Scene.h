@@ -11,6 +11,7 @@
 #include <nlohmann/json.hpp>
 #include "MLCommon.h"
 
+
 class Node;
 class MatrixStack;
 class Program;
@@ -22,6 +23,7 @@ class Vector;
 class Stepper;
 class World;
 struct Solution;
+struct TrainingData;
 
 class Scene
 {
@@ -38,11 +40,13 @@ public:
 	void draw(std::shared_ptr<MatrixStack> MV, const std::shared_ptr<Program> prog, const std::shared_ptr<Program> prog2, const std::shared_ptr<Program> prog3, std::shared_ptr<MatrixStack> P) const;
 	double getTime() const { return t; }
 	void saveEnergyData(int num_steps);
+	void saveTrainingData(int num_steps, int gap);
+
 
 	Eigen::VectorXd y;
 	std::vector<Energy> m_energy_vector;
 	std::vector<double> m_time_vector;
-
+	std::vector<TrainingData> m_training_data_vector;
 
 private:
 	int count;
