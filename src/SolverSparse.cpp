@@ -20,7 +20,7 @@
 #include "ConstraintAttachSpring.h"
 #include "QuadProgMosek.h"
 #include <memory>
-#include <torch/torch.h>
+//#include <torch/torch.h>
 
 
 using namespace std;
@@ -180,11 +180,11 @@ VectorXd SolverSparse::dynamics(VectorXd y)
 {
 	//SparseMatrix<double, RowMajor> G_sp;
 		if (step == 0) {
-			//std::shared_ptr<torch::jit::script::Module> module = torch::jit::load("./trained.pt");
+			m_trained_model = torch::jit::load("./trained_new.pt");
 			//module->to(at::kCUDA);
 
-			//assert(module != nullptr);
-			//std::cout << "ok\n";
+			assert(m_trained_model != nullptr);
+			std::cout << "Loaded trained model\n";
 			//torch::Tensor tensor = torch::rand({ 2, 3 });
 			//std::cout << tensor << std::endl;
 
@@ -354,6 +354,24 @@ VectorXd SolverSparse::dynamics(VectorXd y)
 		J_t_sp = J_sp.transpose();
 
 		// Need prediction
+		// Create a vector of inputs.
+
+		cout << "Start to predict :" << endl;
+		std::vector<torch::jit::IValue> inputs;
+		float data[] = { q0(0), q0(1) };
+		torch::Tensor input = torch::from_blob(data, { 1, 2 });
+		//torch::Tensor input = torch::tensor({ q0(0), q0(1) });
+
+		inputs.push_back(input);
+		std::cout << "input" << input << std::endl;
+
+		// Execute the model and turn its output into a tensor.
+		at::Tensor output = m_trained_model->forward(inputs).toTensor();
+
+		std::cout << "prediction: "<< endl << output.slice(/*dim=*/1, /*start=*/0, /*end=*/4) << '\n';
+		cout << "ground truth: " << endl << JMJ_mi << endl;
+
+
 		Mr_sp = J_t_sp * (Mm_sp - hsquare * K_sp) * J_sp + JMJ_mi;
 
 

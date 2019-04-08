@@ -155,6 +155,6 @@ private:
 	Eigen::VectorXd m_fk;
 	Eigen::VectorXd m_fk_matlab;
 
-
+	std::shared_ptr<torch::jit::script::Module> m_trained_model;
 
 };

@@ -22,8 +22,8 @@ using json = nlohmann::json;
 
 #include <unsupported/Eigen/MatrixFunctions> // TODO: avoid using this later, write a func instead
 
-//#define SIMULATION
-#define DENSE_SAMPLING
+#define SIMULATION
+//#define DENSE_SAMPLING
 
 Scene::Scene() :
 	t(0.0),
@@ -141,11 +141,11 @@ void Scene::step()
 	m_world->incrementTime();
 	torend++;
 	count++;
-	if (count == 900) {
+	if (count == 9000) {
 		cout << count << endl;
 	}
 
-	saveTrainingData(900, 10);
+	saveTrainingData(9000, 2);
 #endif // DENSE_SAMPLING
 
 }
