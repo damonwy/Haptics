@@ -20,7 +20,7 @@
 #include <string>
 #include <cstring>
 #include <cassert>
-
+#include <torch/script.h> 
 
 #define GLEW_STATIC
 #include <GL/glew.h>

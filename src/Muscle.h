@@ -1,3 +1,5 @@
+#pragma once
+
 #ifndef HAPTICS_SRC_MUSCLE_H_
 #define HAPTICS_SRC_MUSCLE_H_
 

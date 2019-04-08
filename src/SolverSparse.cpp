@@ -19,7 +19,8 @@
 #include "ConstraintLoop.h"
 #include "ConstraintAttachSpring.h"
 #include "QuadProgMosek.h"
-#include <torch/script.h> // One-stop header.
+#include <memory>
+#include <torch/torch.h>
 
 
 using namespace std;
@@ -179,11 +180,13 @@ VectorXd SolverSparse::dynamics(VectorXd y)
 {
 	//SparseMatrix<double, RowMajor> G_sp;
 		if (step == 0) {
-			//std::shared_ptr<torch::jit::script::Module> module = torch::jit::load("model.pt");
+			std::shared_ptr<torch::jit::script::Module> module = torch::jit::load("./trained.pt");
+			module->to(at::kCUDA);
 
-			//assert(module != nullptr);
-			//std::cout << "ok\n";
-
+			assert(module != nullptr);
+			std::cout << "ok\n";
+			torch::Tensor tensor = torch::rand({ 2, 3 });
+			std::cout << tensor << std::endl;
 
 			// constant during simulation
 			isCollided = false;
@@ -599,11 +602,11 @@ VectorXd SolverSparse::dynamics(VectorXd y)
 				}
 			case SLDLT:
 				{
-					SimplicialLDLT<SparseMatrix<double>, Lower, NaturalOrdering<int> > sldlt;
+					/*SimplicialLDLT<SparseMatrix<double>, Lower, NaturalOrdering<int> > sldlt;
 
 					sldlt.compute(LHS_sp);
 					qdot1 = sldlt.solve(rhs).segment(0, nr);
-					break;
+					break;*/
 				}			
 			case LU: 
 				{

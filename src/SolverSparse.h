@@ -3,6 +3,7 @@
 #include "Solver.h"
 #include "KKTSolver.h"
 
+
 class SolverSparse : public Solver, public std::enable_shared_from_this<SolverSparse> {
 public:
 	SolverSparse() {}
