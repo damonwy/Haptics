@@ -41,7 +41,7 @@ public:
 	double getTime() const { return t; }
 	void saveEnergyData(int num_steps);
 	void saveTrainingData(int num_steps, int gap);
-
+	void sampleUniformly(int num_samples);
 
 	Eigen::VectorXd y;
 	std::vector<Energy> m_energy_vector;
