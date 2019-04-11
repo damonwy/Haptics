@@ -28,6 +28,8 @@ using namespace Eigen;
 
 //#define CHECK_ENERGY
 //#define DEBUG_MATLAB
+//#define DEBUG_PREDICTION
+
 void SolverSparse::initMatrix(int nm, int nr, int nem, int ner, int nim, int nir) {
 	ni = nim + nir;
 	int nre = nr + ne;
@@ -355,21 +357,29 @@ VectorXd SolverSparse::dynamics(VectorXd y)
 
 		// Need prediction
 		// Create a vector of inputs.
-
+#ifdef DEBUG_PREDICTION
 		cout << "Start to predict :" << endl;
+#endif
+
+
 		std::vector<torch::jit::IValue> inputs;
 		float data[] = { q0(0), q0(1) };
 		torch::Tensor input = torch::from_blob(data, { 1, 2 });
 		//torch::Tensor input = torch::tensor({ q0(0), q0(1) });
 
 		inputs.push_back(input);
+
+#ifdef DEBUG_PREDICTION
 		std::cout << "input" << input << std::endl;
+#endif
 
 		// Execute the model and turn its output into a tensor.
 		at::Tensor output = m_trained_model->forward(inputs).toTensor();
 
+#ifdef DEBUG_PREDICTION
 		std::cout << "prediction: "<< endl << output.slice(/*dim=*/1, /*start=*/0, /*end=*/4) << '\n';
 		cout << "ground truth: " << endl << JMJ_mi << endl;
+#endif
 
 
 		Mr_sp = J_t_sp * (Mm_sp - hsquare * K_sp) * J_sp + JMJ_mi;
@@ -909,9 +919,12 @@ Eigen::VectorXd SolverSparse::dynamics_matlab(Eigen::VectorXd y) {
 	double vm = -0.5*mum*g*(l*c0 + r * c01);
 	double V = M * L * (v1 + v2 + vm);
 	m_energy_matlab.set(K, V);
+#ifdef DEBUG_MATLAB
+
 	cout << "K matlab " << endl << K << endl;
 	cout << "V matlab " << endl << V << endl;
-	
+#endif
+
 	return ydot;
 }
 
