@@ -143,7 +143,7 @@ void Scene::step()
 #endif // SIMULATION
 
 #ifdef DENSE_SAMPLING
-	int num_samples = 100000;
+	int num_samples = 5000;
 	int gap = 2;
 
 	//std::random_device rd;  //Will be used to obtain a seed for the random number engine
@@ -178,17 +178,22 @@ void Scene::saveTrainingData(int samples, int gap) {
 		cout << "finished!" << endl;
 		MatrixXd e_JMJ;
 		MatrixXd e_q;
+		MatrixXd e_Jf;
 		e_JMJ.resize(m_training_data_vector.size(), m_world->nr * m_world->nr);
 		e_q.resize(m_training_data_vector.size(), m_world->nr);
+		e_Jf.resize(m_training_data_vector.size(), m_world->nr);
 
 		for (int i = 0; i < m_training_data_vector.size(); i++) {
-			m_training_data_vector[i].print();
+			//m_training_data_vector[i].print();
 			e_JMJ.row(i) = m_training_data_vector[i].JMJ;
 			e_q.row(i) = m_training_data_vector[i].q0;
+			e_Jf.row(i) = m_training_data_vector[i].Jf;
+
 		}
 
 		mat_to_file(e_JMJ, "JMJ");	
 		mat_to_file(e_q, "q");
+		mat_to_file(e_Jf, "Jf");
 
 	}
 }
@@ -207,9 +212,9 @@ void Scene::sampleUniformly(int num_samples)
 		y(0) = dis(gen);
 		y(1) = dis(gen);
 		
-		y = m_solver->dynamics(y);
-		m_world->update();
-		m_world->incrementTime();
+		VectorXd y_new = m_solver->dynamics(y);
+		//m_world->update();
+		//m_world->incrementTime();
 		torend++;
 		count++;
 		saveTrainingData(num_samples, 1);

@@ -30,6 +30,8 @@ using namespace Eigen;
 //#define DEBUG_MATLAB
 //#define DEBUG_PREDICTION
 
+#define DENSE_SAMPLING_JOINT_SPACE
+
 void SolverSparse::initMatrix(int nm, int nr, int nem, int ner, int nim, int nir) {
 	ni = nim + nir;
 	int nre = nr + ne;
@@ -284,6 +286,14 @@ VectorXd SolverSparse::dynamics(VectorXd y)
 		qdot0 = y.segment(nr, nr);
 
 		initMatrix(nm, nr, nem, ner, nim, nir);
+
+#ifdef DENSE_SAMPLING_JOINT_SPACE
+
+		joint0->scatterDofs(q0, nr);
+		joint0->scatterDDofs(qdot0, nr);
+		muscle0->update();
+
+#endif // DENSE_SAMPLING_JOINT_SPACE
 
 		if (step == 0) {
 			body0->computeMassSparse(Mm_);
@@ -935,6 +945,5 @@ void SolverSparse::test(const Eigen::VectorXd &x, Eigen::VectorXd &dxdt, const d
 
 void SolverSparse::exportTrainingData() {
 	VectorXd JMJvec(Map<VectorXd>(JMJ_mi.data(), JMJ_mi.cols()*JMJ_mi.rows()));
-
 	m_training_data.set(q0, qdot0, JMJvec, Jf_mi, m_fk);
 }
